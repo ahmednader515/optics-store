@@ -49,12 +49,12 @@
 
 ### Products (20 products)
 - Categories: تسكين الآلام, فيتامينات ومكملات غذائية, الحساسية والجيوب الأنفية, صحة الجهاز الهضمي, نزلات البرد والإنفلونزا
-- Tags: best-seller, featured, pain-relief, vitamins, allergy, immune-support, supplements, digestive, stomach-relief, bone-health, cold-flu, cough-relief, omega-3, heart-health
+- Tags: best-seller, featured, sunglasses, contact-lenses, reading-glasses, computer-glasses, eye-care, premium, sports, luxury
 
 ### Orders (3 orders)
 - Order 1: $54.64 (John Doe - Tylenol + Advil)
 - Order 2: $40.51 (Jane Harris - Centrum + Claritin)
-- Order 3: $78.17 (Jack Ryan - Zinc + Pepto + Vitamin D3)
+- Order 3: $661.19 (Jack Ryan - Contact Lens Solution + Computer Glasses + Sunglasses)
 
 ### Web Pages (10 pages)
 - About Us, Contact Us, Help, Privacy Policy, Conditions of Use, Customer Service, Returns Policy, Careers, Blog, Affiliate, Advertising, Shipping

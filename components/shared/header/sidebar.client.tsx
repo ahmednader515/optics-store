@@ -14,26 +14,26 @@ import Link from "next/link";
 import { SignOut } from "@/lib/actions/user.actions";
 
 const categoryTranslations: { [key: string]: string } = {
-  'Pain Relief': 'تسكين الآلام',
-  'Vitamins & Supplements': 'فيتامينات ومكملات غذائية',
-  'Allergy & Sinus': 'الحساسية والجيوب الأنفية',
-  'Digestive Health': 'صحة الجهاز الهضمي',
-  'Cold & Flu': 'نزلات البرد والإنفلونزا',
-  'Prescription Medications': 'الأدوية الموصوفة',
-  'Over-the-Counter': 'الأدوية المتاحة بدون وصفة',
-  'Personal Care': 'العناية الشخصية',
-  'Health & Wellness': 'الصحة والعافية',
-  'First Aid': 'الإسعافات الأولية',
-  'Baby Care': 'العناية بالطفل',
-  'Elderly Care': 'العناية بالمسنين',
-  'Diabetes Care': 'العناية بمرضى السكري',
-  'Heart Health': 'صحة القلب',
-  'Mental Health': 'الصحة النفسية',
-  "Women's Health": 'صحة المرأة',
-  "Men's Health": 'صحة الرجل',
-  'Skin Care': 'العناية بالبشرة',
-  'Hair Care': 'العناية بالشعر',
-  'Oral Care': 'العناية بالفم والأسنان'
+  'Eyewear Frames': 'إطارات النظارات',
+  'Contact Lenses': 'العدسات اللاصقة',
+  'Sunglasses': 'النظارات الشمسية',
+  'Reading Glasses': 'نظارات القراءة',
+  'Computer Glasses': 'نظارات الكمبيوتر',
+  'Prescription Eyewear': 'النظارات الموصوفة',
+  'Over-the-Counter': 'النظارات المتاحة بدون وصفة',
+  'Eye Care Products': 'منتجات العناية بالعين',
+  'Vision & Eye Health': 'صحة العين والرؤية',
+  'Eye Protection': 'حماية العين',
+  'Kids Eyewear': 'نظارات الأطفال',
+  'Senior Eyewear': 'نظارات كبار السن',
+  'Sports Eyewear': 'نظارات الرياضة',
+  'Fashion Eyewear': 'نظارات الموضة',
+  'Professional Eyewear': 'النظارات المهنية',
+  "Women's Eyewear": 'نظارات المرأة',
+  "Men's Eyewear": 'نظارات الرجل',
+  'Lens Coatings': 'طلاءات العدسات',
+  'Eyewear Accessories': 'ملحقات النظارات',
+  'Eye Care Solutions': 'محاليل العناية بالعين'
 };
 
 export default function SidebarClient({ 

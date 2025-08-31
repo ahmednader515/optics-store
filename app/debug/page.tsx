@@ -13,7 +13,7 @@ export default async function DebugPage() {
   const categories = await getAllCategories()
   const bestSellers = await getProductsByTag({ tag: 'best-seller' })
   const featured = await getProductsForCard({ tag: 'featured' })
-  const painRelief = await getProductsByTag({ tag: 'pain-relief' })
+  const sunglasses = await getProductsByTag({ tag: 'sunglasses' })
   
   // Get all available tags from data
   const allTags = new Set<string>()
@@ -103,12 +103,12 @@ export default async function DebugPage() {
           </div>
         </div>
         
-        {/* Pain Relief Products */}
+        {/* Sunglasses Products */}
         <div className="bg-red-100 p-4 rounded">
-          <h2 className="text-xl font-semibold mb-2">تسكين الآلام Products (pain-relief tag)</h2>
-          <p><strong>Count:</strong> {painRelief.length}</p>
+          <h2 className="text-xl font-semibold mb-2">النظارات الشمسية Products (sunglasses tag)</h2>
+          <p><strong>Count:</strong> {sunglasses.length}</p>
           <div className="space-y-2 mt-2">
-            {painRelief.map((product: any, index: number) => (
+            {sunglasses.map((product: any, index: number) => (
               <div key={index} className="bg-red-200 p-2 rounded">
                 <p><strong>Name:</strong> {product.name}</p>
                 <p><strong>Tags:</strong> {product.tags?.join(', ')}</p>

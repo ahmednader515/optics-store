@@ -1,6 +1,6 @@
 # Loading States Implementation Summary
 
-This document summarizes all the loading states that have been implemented across the pharmacy store website to improve user experience during time-consuming operations.
+This document summarizes all the loading states that have been implemented across the optics store website to improve user experience during time-consuming operations.
 
 ## 🎯 Overview
 
@@ -227,6 +227,6 @@ The website now includes comprehensive loading states for all actions that take 
 
 ## 📝 Conclusion
 
-The pharmacy store website now provides a comprehensive and professional loading experience for all users. Every action that takes time shows appropriate loading states, preventing user confusion and improving the overall user experience. The implementation follows best practices for performance, accessibility, and maintainability.
+The optics store website now provides a comprehensive and professional loading experience for all users. Every action that takes time shows appropriate loading states, preventing user confusion and improving the overall user experience. The implementation follows best practices for performance, accessibility, and maintainability.
 
 All loading states are implemented in Arabic to match the website's language, and the design is consistent across all components. Users can now confidently perform actions knowing that the system is working and will provide clear feedback about the status of their requests.

@@ -1,7 +1,7 @@
 # Mobile Responsive Implementation Summary
 
 ## Overview
-This document summarizes the comprehensive mobile responsive improvements made to the pharmacy store website. All changes maintain the existing desktop design while ensuring optimal mobile experience across all screen sizes.
+This document summarizes the comprehensive mobile responsive improvements made to the optics store website. All changes maintain the existing desktop design while ensuring optimal mobile experience across all screen sizes.
 
 ## Global CSS Improvements
 

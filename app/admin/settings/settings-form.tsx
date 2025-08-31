@@ -12,6 +12,7 @@ import { toast } from '@/hooks/use-toast'
 import { Plus, Trash2, Save, Image as ImageIcon, Upload, Truck, Calculator, DollarSign } from 'lucide-react'
 import data from '@/lib/data'
 import { updateSetting } from '@/lib/actions/setting.actions'
+import CategoryManager from '@/components/admin/category-manager'
 
 interface CarouselItem {
   title: string
@@ -38,7 +39,7 @@ export default function SettingsForm({ setting }: { setting: any }) {
   const [taxSettings, setTaxSettings] = useState({
     taxRate: 7.5,
     taxIncluded: false,
-    taxExemptCategories: ['prescription-medications', 'medical-devices'],
+    taxExemptCategories: ['prescription-eyewear', 'optical-devices'],
     taxExemptThreshold: 0,
   })
   const [productPricing, setProductPricing] = useState({
@@ -51,14 +52,14 @@ export default function SettingsForm({ setting }: { setting: any }) {
         startDate: '2024-12-01',
         endDate: '2024-12-31',
         discountRate: 15,
-        applicableCategories: ['vitamins', 'supplements', 'cold-flu'],
+        applicableCategories: ['sunglasses', 'protective-eyewear', 'computer-glasses'],
       },
       {
-        name: 'Summer Wellness',
+        name: 'Summer Vision',
         startDate: '2024-06-01',
         endDate: '2024-08-31',
         discountRate: 20,
-        applicableCategories: ['sunscreen', 'hydration', 'vitamins'],
+        applicableCategories: ['sunglasses', 'contact-lenses', 'eye-care'],
       },
     ] as SeasonalDiscount[],
   })
@@ -330,6 +331,9 @@ export default function SettingsForm({ setting }: { setting: any }) {
         </CardContent>
       </Card>
 
+      {/* Category Management */}
+      <CategoryManager />
+
       {/* Delivery Settings */}
       <Card>
         <CardHeader>
@@ -451,7 +455,7 @@ export default function SettingsForm({ setting }: { setting: any }) {
                 <Label htmlFor='taxExemptCategories'>فئات الإعفاء الضريبي</Label>
                 <Textarea
                   id='taxExemptCategories'
-                  placeholder='أدخل الفئات مفصولة بفواصل (مثال: prescription-medications, medical-devices)'
+                  placeholder='أدخل الفئات مفصولة بفواصل (مثال: prescription-eyewear, optical-devices)'
                   value={taxSettings.taxExemptCategories.join(', ')}
                   onChange={(e) => setTaxSettings({
                     ...taxSettings,
@@ -593,7 +597,7 @@ export default function SettingsForm({ setting }: { setting: any }) {
                     <Label htmlFor={`applicableCategories${index}`}>الفئات المطبقة</Label>
                     <Textarea
                       id={`applicableCategories${index}`}
-                      placeholder='أدخل الفئات مفصولة بفواصل (مثال: vitamins, supplements)'
+                      placeholder='أدخل الفئات مفصولة بفواصل (مثال: sunglasses, contact-lenses)'
                       value={discount.applicableCategories.join(', ')}
                       onChange={(e) => updateSeasonalDiscount(index, 'applicableCategories', e.target.value.split(',').map(cat => cat.trim()).filter(cat => cat))}
                       rows={2}

@@ -67,7 +67,6 @@ const ProductForm = ({
   const router = useRouter()
   const [categories, setCategories] = useState<string[]>([])
   const [isLoadingCategories, setIsLoadingCategories] = useState(true)
-  const [newCategoryInput, setNewCategoryInput] = useState('')
   const { isLoading: isSubmitting, withLoading } = useLoading()
 
   const form = useForm<IProductInput>({
@@ -82,43 +81,35 @@ const ProductForm = ({
     shouldUnregister: false,
   })
 
+  // Fetch categories function
+  const fetchCategories = async () => {
+    try {
+      setIsLoadingCategories(true)
+              const categoriesData = await getAllCategories()
+        setCategories(categoriesData)
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+    } finally {
+      setIsLoadingCategories(false)
+    }
+  }
+
+
+
   // Fetch categories when component mounts
   useEffect(() => {
-    console.log('ProductForm mounted with:', { type, product, productId })
-    const fetchCategories = async () => {
-      try {
-        setIsLoadingCategories(true)
-        const categoriesData = await getAllCategories()
-        setCategories(categoriesData)
-        
-        // If this is an update and the product has a category not in the list, add it
-        if (type === 'Update' && product?.category && !categoriesData.includes(product.category)) {
-          setCategories(prev => [...prev, product.category])
-        }
-      } catch (error) {
-        console.error('Error fetching categories:', error)
-      } finally {
-        setIsLoadingCategories(false)
-      }
-    }
     fetchCategories()
   }, [type, product, productId])
 
-  // Reset new category input when form changes
-  useEffect(() => {
-    const category = form.watch('category')
-    if (category !== '__new__') {
-      setNewCategoryInput('')
-    }
-  }, [form])
+
 
   const { toast } = useToast()
   const onSubmit = async (values: IProductInput) => {
-    // Validate that category is not a placeholder value
-    if (values.category === '__new__' || values.category === '__loading__' || values.category === '__no_categories__') {
+    // Validate that category is selected
+    if (!values.category || values.category === '__loading__' || values.category === '__no_categories__') {
       toast({
         variant: 'destructive',
-        description: 'يرجى اختيار فئة صحيحة أو إدخال فئة جديدة',
+        description: 'يرجى اختيار فئة صحيحة',
       })
       return
     }
@@ -228,38 +219,27 @@ const ProductForm = ({
                         ) : categories.length === 0 ? (
                           <SelectItem value="__no_categories__" disabled>لا توجد فئات متاحة</SelectItem>
                         ) : (
-                          <>
-                            {categories.map((category) => (
-                              <SelectItem key={category} value={category}>
-                                {category}
-                              </SelectItem>
-                            ))}
-                            <SelectItem value="__new__">+ إضافة فئة جديدة</SelectItem>
-                          </>
+                          categories.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))
                         )}
                       </SelectContent>
                     </Select>
                   </FormControl>
-                  {field.value === '__new__' && (
-                    <Input
-                      value={newCategoryInput}
-                      onChange={(e) => {
-                        const newCategory = e.target.value
-                        setNewCategoryInput(newCategory)
-                        if (newCategory.trim()) {
-                          field.onChange(newCategory.trim())
-                        }
-                      }}
-                      onBlur={(e) => {
-                        // If user leaves the input empty, reset to empty string
-                        if (!e.target.value.trim()) {
-                          field.onChange('')
-                          setNewCategoryInput('')
-                        }
-                      }}
-                      className="mt-2 border-gray-300 bg-white text-gray-900 focus:border-orange-500 focus:ring-orange-500"
-                    />
+                  {categories.length === 0 && !isLoadingCategories && (
+                    <div className="text-sm text-gray-600 mt-2">
+                      <p>لا توجد فئات متاحة. يرجى إضافة فئات من صفحة الإعدادات أولاً.</p>
+                      <a 
+                        href="/admin/settings" 
+                        className="text-orange-600 hover:text-orange-700 underline mt-1 inline-block"
+                      >
+                        الذهاب إلى الإعدادات
+                      </a>
+                    </div>
                   )}
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -475,18 +455,23 @@ const ProductForm = ({
                   <Button
           type='button'
           size='lg'
-          disabled={isSubmitting}
+          disabled={isSubmitting || categories.length === 0}
           onClick={() => {
             const values = form.getValues()
             onSubmit(values)
           }}
-          className='button col-span-2 w-full bg-orange-600 hover:bg-orange-700 text-white'
+          className='button col-span-2 w-full bg-orange-600 hover:bg-orange-700 text-white disabled:bg-gray-400 disabled:cursor-not-allowed'
         >
           {isSubmitting ? 'جاري الإرسال...' : `${type === 'Create' ? 'إنشاء' : 'تحديث'} المنتج`}
         </Button>
         {isSubmitting && (
           <p className='text-sm text-gray-600 text-center'>
             {type === 'Update' ? 'جاري تحديث المنتج...' : 'جاري إنشاء المنتج...'}
+          </p>
+        )}
+        {categories.length === 0 && !isLoadingCategories && (
+          <p className='text-sm text-orange-600 text-center'>
+            لا يمكن إنشاء منتج بدون فئات. يرجى إضافة فئات من صفحة الإعدادات أولاً.
           </p>
         )}
         </div>

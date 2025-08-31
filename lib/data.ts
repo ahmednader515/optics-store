@@ -247,15 +247,15 @@ const users: IUserInput[] = [
 
 const products: IProductInput[] = [
   {
-    name: 'Tylenol Extra Strength Acetaminophen 500mg',
-    slug: toSlug('Tylenol Extra Strength Acetaminophen 500mg'),
-    category: 'تسكين الآلام',
+    name: 'Ray-Ban Aviator Classic Sunglasses',
+    slug: toSlug('Ray-Ban Aviator Classic Sunglasses'),
+    category: 'النظارات الشمسية',
     images: ['/images/p11-1.jpg', '/images/p11-2.jpg'],
-    tags: ['best-seller', 'pain-relief'],
+    tags: ['best-seller', 'sunglasses', 'premium'],
     isPublished: true,
-    price: 12.99,
-    listPrice: 15.99,
-    brand: 'Tylenol',
+    price: 189.99,
+    listPrice: 249.99,
+    brand: 'Ray-Ban',
     avgRating: 4.71,
     numReviews: 127,
     ratingDistribution: [
@@ -267,21 +267,21 @@ const products: IProductInput[] = [
     ],
     numSales: 234,
     countInStock: 45,
-    description: 'Extra strength pain reliever and fever reducer. Contains 500mg acetaminophen per tablet. For temporary relief of minor aches and pains due to headache, backache, minor pain of arthritis, toothache, muscular aches, premenstrual and menstrual cramps, and for the reduction of fever.',
-    sizes: ['100 tablets', '200 tablets'],
-    colors: ['White'],
+    description: 'Classic aviator sunglasses with gold-tone frame and green lenses. Features UV400 protection and polarized lenses for superior glare reduction. Perfect for driving and outdoor activities.',
+    sizes: ['58mm', '62mm'],
+    colors: ['Gold/Green', 'Silver/Gray'],
     reviews: [],
   },
   {
-    name: 'Advil Ibuprofen 200mg Tablets',
-    slug: toSlug('Advil Ibuprofen 200mg Tablets'),
-    category: 'تسكين الآلام',
+    name: 'Oakley Holbrook Matte Black Sunglasses',
+    slug: toSlug('Oakley Holbrook Matte Black Sunglasses'),
+    category: 'النظارات الشمسية',
     images: ['/images/p12-1.jpg', '/images/p12-2.jpg'],
-    tags: ['featured', 'pain-relief'],
+    tags: ['featured', 'sunglasses', 'sports'],
     isPublished: true,
-    price: 14.99,
+    price: 159.99,
     listPrice: 0,
-    brand: 'Advil',
+    brand: 'Oakley',
     avgRating: 4.5,
     numReviews: 89,
     ratingDistribution: [
@@ -293,21 +293,21 @@ const products: IProductInput[] = [
     ],
     numSales: 156,
     countInStock: 67,
-    description: 'Ibuprofen 200mg tablets for temporary relief of minor aches and pains. Reduces fever and inflammation. Take with food or milk to minimize stomach upset.',
-    sizes: ['50 tablets', '100 tablets'],
-    colors: ['White'],
+    description: 'Matte black frame with Prizm lenses for enhanced color and contrast. Features O Matter frame material for durability and lightweight comfort. Ideal for everyday wear and sports activities.',
+    sizes: ['Standard'],
+    colors: ['Matte Black', 'Matte White'],
     reviews: [],
   },
   {
-    name: 'Centrum Silver Multivitamin for Adults 50+',
-    slug: toSlug('Centrum Silver Multivitamin for Adults 50+'),
-    category: 'فيتامينات ومكملات غذائية',
-    brand: 'Centrum',
+    name: 'Acuvue Oasys 1-Day Contact Lenses',
+    slug: toSlug('Acuvue Oasys 1-Day Contact Lenses'),
+    category: 'العدسات اللاصقة',
+    brand: 'Acuvue',
     images: ['/images/p13-1.jpg', '/images/p13-2.jpg'],
-    tags: ['best-seller', 'vitamins'],
+    tags: ['best-seller', 'contact-lenses', 'daily'],
     isPublished: true,
-    price: 18.99,
-    listPrice: 22.99,
+    price: 89.99,
+    listPrice: 119.99,
     avgRating: 4.3,
     numReviews: 203,
     ratingDistribution: [
@@ -319,21 +319,21 @@ const products: IProductInput[] = [
     ],
     numSales: 445,
     countInStock: 89,
-    description: 'Complete multivitamin specially formulated for adults 50+. Contains essential vitamins and minerals to support heart health, brain function, and eye health. One tablet daily with food.',
-    sizes: ['60 tablets', '120 tablets'],
-    colors: ['Silver'],
+    description: 'Premium daily disposable contact lenses with HydraLuxe Technology for exceptional comfort. Features UV blocking and high oxygen permeability. Perfect for all-day wear with superior moisture retention.',
+    sizes: ['90 lenses', '180 lenses'],
+    colors: ['Clear'],
     reviews: [],
   },
   {
-    name: 'Claritin 24-Hour Non-Drowsy Allergy Relief',
-    slug: toSlug('Claritin 24-Hour Non-Drowsy Allergy Relief'),
-    category: 'الحساسية والجيوب الأنفية',
+    name: 'Warby Parker Percey Reading Glasses',
+    slug: toSlug('Warby Parker Percey Reading Glasses'),
+    category: 'نظارات القراءة',
     images: ['/images/p14-1.jpg', '/images/p14-2.jpg'],
-    tags: ['featured', 'allergy'],
+    tags: ['featured', 'reading-glasses', 'stylish'],
     isPublished: true,
-    price: 16.99,
-    listPrice: 19.99,
-    brand: 'Claritin',
+    price: 95.00,
+    listPrice: 0,
+    brand: 'Warby Parker',
     avgRating: 4.6,
     numReviews: 167,
     ratingDistribution: [
@@ -345,21 +345,21 @@ const products: IProductInput[] = [
     ],
     numSales: 298,
     countInStock: 56,
-    description: '24-hour non-drowsy allergy relief. Contains loratadine 10mg. Relieves sneezing, runny nose, itchy watery eyes, and itchy throat and nose due to hay fever or other upper respiratory allergies.',
-    sizes: ['30 tablets', '60 tablets'],
-    colors: ['Blue'],
+    description: 'Stylish reading glasses with acetate frame and anti-reflective coating. Available in multiple strengths for comfortable reading. Features lightweight design and modern aesthetic perfect for everyday use.',
+    sizes: ['+1.00', '+1.50', '+2.00', '+2.50', '+3.00'],
+    colors: ['Tortoise', 'Black', 'Blue'],
     reviews: [],
   },
   {
-    name: 'Zinc 50mg Immune Support Supplements',
-    slug: toSlug('Zinc 50mg Immune Support Supplements'),
-    category: 'فيتامينات ومكملات غذائية',
+    name: 'Opti-Free Puremoist Contact Lens Solution',
+    slug: toSlug('Opti-Free Puremoist Contact Lens Solution'),
+    category: 'مستلزمات العناية',
     images: ['/images/p15-1.jpg', '/images/p15-2.jpg'],
-    tags: ['immune-support', 'supplements'],
+    tags: ['contact-lens-solution', 'eye-care'],
     isPublished: true,
-    price: 11.99,
+    price: 14.99,
     listPrice: 0,
-    brand: 'Nature Made',
+    brand: 'Opti-Free',
     avgRating: 4.4,
     numReviews: 78,
     ratingDistribution: [
@@ -371,21 +371,21 @@ const products: IProductInput[] = [
     ],
     numSales: 134,
     countInStock: 34,
-    description: 'Zinc 50mg tablets to support immune system health. Essential mineral that helps maintain normal immune function. Take one tablet daily with food.',
-    sizes: ['60 tablets', '120 tablets'],
-    colors: ['White'],
+    description: 'Advanced contact lens solution with Puremoist Technology for all-day comfort. Multi-purpose solution for cleaning, rinsing, disinfecting, and storing contact lenses. Suitable for all soft contact lens types.',
+    sizes: ['120ml', '300ml'],
+    colors: ['Clear'],
     reviews: [],
   },
   {
-    name: 'Pepto-Bismol Liquid Upset Stomach Relief',
-    slug: toSlug('Pepto-Bismol Liquid Upset Stomach Relief'),
-    category: 'صحة الجهاز الهضمي',
+    name: 'Gunnar Computer Gaming Glasses',
+    slug: toSlug('Gunnar Computer Gaming Glasses'),
+    category: 'نظارات الكمبيوتر',
     images: ['/images/p16-1.jpg', '/images/p16-2.jpg'],
-    tags: ['digestive', 'stomach-relief'],
+    tags: ['computer-glasses', 'blue-light-filter', 'gaming'],
     isPublished: true,
-    price: 8.99,
-    listPrice: 10.99,
-    brand: 'Pepto-Bismol',
+    price: 79.99,
+    listPrice: 99.99,
+    brand: 'Gunnar',
     avgRating: 4.2,
     numReviews: 95,
     ratingDistribution: [
@@ -397,21 +397,21 @@ const products: IProductInput[] = [
     ],
     numSales: 187,
     countInStock: 42,
-    description: 'Liquid upset stomach relief. Relieves nausea, heartburn, indigestion, upset stomach, and diarrhea. Contains bismuth subsalicylate. Take as directed.',
-    sizes: ['8 fl oz', '16 fl oz'],
-    colors: ['Pink'],
+    description: 'Computer gaming glasses with amber-tinted lenses to reduce eye strain and filter blue light. Features lightweight frame and anti-reflective coating. Perfect for extended computer use and gaming sessions.',
+    sizes: ['Standard'],
+    colors: ['Black/Amber', 'White/Amber'],
     reviews: [],
   },
   {
-    name: 'Vitamin D3 2000 IU Softgels',
-    slug: toSlug('Vitamin D3 2000 IU Softgels'),
-    category: 'فيتامينات ومكملات غذائية',
+    name: 'Maui Jim Red Sands Polarized Sunglasses',
+    slug: toSlug('Maui Jim Red Sands Polarized Sunglasses'),
+    category: 'النظارات الشمسية',
     images: ['/images/p17-1.jpg', '/images/p17-2.jpg'],
-    tags: ['vitamins', 'bone-health'],
+    tags: ['sunglasses', 'polarized', 'premium'],
     isPublished: true,
-    price: 13.99,
-    listPrice: 16.99,
-    brand: 'Nature Made',
+    price: 249.99,
+    listPrice: 299.99,
+    brand: 'Maui Jim',
     avgRating: 4.7,
     numReviews: 234,
     ratingDistribution: [
@@ -423,21 +423,21 @@ const products: IProductInput[] = [
     ],
     numSales: 567,
     countInStock: 78,
-    description: 'Vitamin D3 2000 IU softgels for bone health and immune support. Helps the body absorb calcium and maintain strong bones. Take one softgel daily with food.',
-    sizes: ['60 softgels', '120 softgels'],
-    colors: ['Yellow'],
+    description: 'Premium polarized sunglasses with Red Sands lens technology for enhanced color and clarity. Features lightweight titanium frame and superior UV protection. Perfect for outdoor activities and beach wear.',
+    sizes: ['Standard'],
+    colors: ['Titanium/Red Sands', 'Gold/Red Sands'],
     reviews: [],
   },
   {
-    name: 'Mucinex DM Extended-Release Tablets',
-    slug: toSlug('Mucinex DM Extended-Release Tablets'),
-    category: 'نزلات البرد والإنفلونزا',
+    name: 'Bausch + Lomb Biotrue Contact Lens Solution',
+    slug: toSlug('Bausch + Lomb Biotrue Contact Lens Solution'),
+    category: 'مستلزمات العناية',
     images: ['/images/p18-1.jpg', '/images/p18-2.jpg'],
-    tags: ['cold-flu', 'cough-relief'],
+    tags: ['contact-lens-solution', 'eye-care', 'biotrue'],
     isPublished: true,
-    price: 15.99,
-    listPrice: 18.99,
-    brand: 'Mucinex',
+    price: 16.99,
+    listPrice: 19.99,
+    brand: 'Bausch + Lomb',
     avgRating: 4.3,
     numReviews: 156,
     ratingDistribution: [
@@ -449,21 +449,21 @@ const products: IProductInput[] = [
     ],
     numSales: 234,
     countInStock: 45,
-    description: 'Extended-release tablets for cough and chest congestion relief. Contains guaifenesin and dextromethorphan. Provides 12-hour relief. Take as directed.',
-    sizes: ['20 tablets', '40 tablets'],
-    colors: ['White'],
+    description: 'Advanced contact lens solution with BioTrue technology that mimics natural tears. Multi-purpose solution for cleaning, rinsing, disinfecting, and storing contact lenses. Provides all-day comfort.',
+    sizes: ['120ml', '300ml'],
+    colors: ['Clear'],
     reviews: [],
   },
   {
-    name: 'Fish Oil Omega-3 1000mg Softgels',
-    slug: toSlug('Fish Oil Omega-3 1000mg Softgels'),
-    category: 'فيتامينات ومكملات غذائية',
+    name: 'Johnson & Johnson 1-Day Acuvue Moist Contact Lenses',
+    slug: toSlug('Johnson & Johnson 1-Day Acuvue Moist Contact Lenses'),
+    category: 'العدسات اللاصقة',
     images: ['/images/p19-1.jpg', '/images/p19-2.jpg'],
-    tags: ['omega-3', 'heart-health'],
+    tags: ['contact-lenses', 'daily', 'moist'],
     isPublished: true,
-    price: 19.99,
-    listPrice: 24.99,
-    brand: 'Nature Made',
+    price: 69.99,
+    listPrice: 89.99,
+    brand: 'Acuvue',
     avgRating: 4.5,
     numReviews: 189,
     ratingDistribution: [
@@ -475,21 +475,21 @@ const products: IProductInput[] = [
     ],
     numSales: 345,
     countInStock: 67,
-    description: 'Fish oil omega-3 1000mg softgels for heart health. Supports cardiovascular health and brain function. Take two softgels daily with food.',
-    sizes: ['60 softgels', '120 softgels'],
-    colors: ['Orange'],
+    description: 'Daily disposable contact lenses with Lacreon Technology for exceptional moisture retention. Features UV blocking and high oxygen permeability. Perfect for all-day comfort and convenience.',
+    sizes: ['90 lenses', '180 lenses'],
+    colors: ['Clear'],
     reviews: [],
   },
   {
-    name: 'Bayer Aspirin 325mg Tablets',
-    slug: toSlug('Bayer Aspirin 325mg Tablets'),
-    category: 'تسكين الآلام',
+    name: 'Tom Ford FT-0001 Aviator Sunglasses',
+    slug: toSlug('Tom Ford FT-0001 Aviator Sunglasses'),
+    category: 'النظارات الشمسية',
     images: ['/images/p20-1.jpg', '/images/p20-2.jpg'],
-    tags: ['pain-relief', 'heart-health'],
+    tags: ['sunglasses', 'luxury', 'aviator'],
     isPublished: true,
-    price: 9.99,
-    listPrice: 12.99,
-    brand: 'Bayer',
+    price: 399.99,
+    listPrice: 499.99,
+    brand: 'Tom Ford',
     avgRating: 4.4,
     numReviews: 145,
     ratingDistribution: [
@@ -501,9 +501,9 @@ const products: IProductInput[] = [
     ],
     numSales: 278,
     countInStock: 89,
-    description: 'Bayer aspirin 325mg tablets for pain relief and heart health. Used for temporary relief of minor aches and pains. May also be used for heart attack prevention as directed by a doctor.',
-    sizes: ['100 tablets', '200 tablets'],
-    colors: ['White'],
+    description: 'Luxury aviator sunglasses with premium acetate frame and gradient lenses. Features superior craftsmanship and timeless design. Perfect for those who appreciate luxury eyewear and sophisticated style.',
+    sizes: ['Standard'],
+    colors: ['Tortoise/Brown', 'Black/Gray'],
     reviews: [],
   },
 ]
@@ -517,10 +517,10 @@ const orders = [
     },
     expectedDeliveryDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
     paymentMethod: 'دفع عند الاستلام',
-    itemsPrice: 45.97,
+    itemsPrice: 539.97,
     shippingPrice: 4.99,
-    taxPrice: 3.68,
-    totalPrice: 54.64,
+    taxPrice: 40.75,
+    totalPrice: 585.71,
     isPaid: true,
     paidAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
     isDelivered: false,
@@ -537,20 +537,20 @@ const orders = [
       {
         id: 'item-1',
         productId: 'product-1',
-        name: 'Tylenol Extra Strength Acetaminophen 500mg',
+        name: 'Ray-Ban Aviator Classic Sunglasses',
         image: '/images/p11-1.jpg',
-        price: 12.99,
+        price: 189.99,
         quantity: 2,
-        category: 'تسكين الآلام'
+        category: 'النظارات الشمسية'
       },
       {
         id: 'item-2',
         productId: 'product-2',
-        name: 'Advil Ibuprofen 200mg Tablets',
+        name: 'Oakley Holbrook Matte Black Sunglasses',
         image: '/images/p12-1.jpg',
-        price: 14.99,
+        price: 159.99,
         quantity: 1,
-        category: 'تسكين الآلام'
+        category: 'النظارات الشمسية'
       }
     ]
   },
@@ -563,10 +563,10 @@ const orders = [
     },
     expectedDeliveryDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
     paymentMethod: 'دفع عند الاستلام',
-    itemsPrice: 32.98,
+    itemsPrice: 184.99,
     shippingPrice: 4.99,
-    taxPrice: 2.54,
-    totalPrice: 40.51,
+    taxPrice: 14.25,
+    totalPrice: 204.23,
     isPaid: true,
     paidAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
     isDelivered: true,
@@ -584,20 +584,20 @@ const orders = [
       {
         id: 'item-3',
         productId: 'product-3',
-        name: 'Centrum Silver Multivitamin for Adults 50+',
+        name: 'Acuvue Oasys 1-Day Contact Lenses',
         image: '/images/p13-1.jpg',
-        price: 18.99,
+        price: 89.99,
         quantity: 1,
-        category: 'فيتامينات ومكملات غذائية'
+        category: 'العدسات اللاصقة'
       },
       {
         id: 'item-4',
         productId: 'product-4',
-        name: 'Claritin 24-Hour Non-Drowsy Allergy Relief',
+        name: 'Warby Parker Percey Reading Glasses',
         image: '/images/p14-1.jpg',
-        price: 16.99,
+        price: 95.00,
         quantity: 1,
-        category: 'الحساسية والجيوب الأنفية'
+        category: 'نظارات القراءة'
       }
     ]
   },
@@ -610,10 +610,10 @@ const orders = [
     },
     expectedDeliveryDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
     paymentMethod: 'دفع عند الاستلام',
-    itemsPrice: 67.96,
+    itemsPrice: 609.95,
     shippingPrice: 4.99,
-    taxPrice: 5.22,
-    totalPrice: 78.17,
+    taxPrice: 46.25,
+    totalPrice: 661.19,
     isPaid: false,
     isDelivered: false,
     shippingAddress: {
@@ -629,29 +629,29 @@ const orders = [
       {
         id: 'item-5',
         productId: 'product-5',
-        name: 'Zinc 50mg Immune Support Supplements',
+        name: 'Opti-Free Puremoist Contact Lens Solution',
         image: '/images/p15-1.jpg',
-        price: 11.99,
+        price: 14.99,
         quantity: 2,
-        category: 'فيتامينات ومكملات غذائية'
+        category: 'مستلزمات العناية'
       },
       {
         id: 'item-6',
         productId: 'product-6',
-        name: 'Pepto-Bismol Liquid Upset Stomach Relief',
+        name: 'Gunnar Computer Gaming Glasses',
         image: '/images/p16-1.jpg',
-        price: 8.99,
+        price: 79.99,
         quantity: 1,
-        category: 'صحة الجهاز الهضمي'
+        category: 'نظارات الكمبيوتر'
       },
       {
         id: 'item-7',
         productId: 'product-7',
-        name: 'Vitamin D3 2000 IU Softgels',
+        name: 'Maui Jim Red Sands Polarized Sunglasses',
         image: '/images/p17-1.jpg',
-        price: 13.99,
+        price: 249.99,
         quantity: 2,
-        category: 'فيتامينات ومكملات غذائية'
+        category: 'النظارات الشمسية'
       }
     ]
   },
@@ -664,10 +664,10 @@ const orders = [
     },
     expectedDeliveryDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
     paymentMethod: 'دفع عند الاستلام',
-    itemsPrice: 89.95,
+    itemsPrice: 556.96,
     shippingPrice: 0, // Free shipping
-    taxPrice: 6.75,
-    totalPrice: 96.70,
+    taxPrice: 41.77,
+    totalPrice: 598.73,
     isPaid: false,
     isDelivered: false,
     shippingAddress: {
@@ -683,29 +683,29 @@ const orders = [
       {
         id: 'item-8',
         productId: 'product-8',
-        name: 'Omega-3 Fish Oil 1000mg Softgels',
+        name: 'Johnson & Johnson 1-Day Acuvue Moist Contact Lenses',
         image: '/images/p21-1.jpg',
-        price: 24.99,
+        price: 69.99,
         quantity: 2,
-        category: 'فيتامينات ومكملات غذائية'
+        category: 'العدسات اللاصقة'
       },
       {
         id: 'item-9',
         productId: 'product-9',
-        name: 'Probiotic 50 Billion CFU Daily Supplement',
+        name: 'Tom Ford FT-0001 Aviator Sunglasses',
         image: '/images/p22-1.jpg',
-        price: 19.99,
+        price: 399.99,
         quantity: 1,
-        category: 'صحة الجهاز الهضمي'
+        category: 'النظارات الشمسية'
       },
       {
         id: 'item-10',
         productId: 'product-10',
-        name: 'Magnesium 400mg Natural Calm Supplement',
+        name: 'Bausch + Lomb Biotrue Contact Lens Solution',
         image: '/images/p23-1.jpg',
-        price: 24.99,
+        price: 16.99,
         quantity: 1,
-        category: 'فيتامينات ومكملات غذائية'
+        category: 'مستلزمات العناية'
       }
     ]
   }
@@ -813,29 +813,29 @@ const data: Data = {
     {
       title: 'About Us',
       slug: 'about-us',
-      content: `Welcome to الليثي صيدلية, your trusted partner in health and wellness. Since our founding, we have been committed to providing the highest quality medications, health products, and personalized care to our community.
+      content: `Welcome to نظارتي, your trusted partner in vision and eye care. Since our founding, we have been committed to providing the highest quality eyewear, contact lenses, and personalized optical care to our community.
 
-At الليثي صيدلية, we understand that your health is your most valuable asset. That's why we've built our reputation on trust, expertise, and a deep commitment to your well-being. Our team of licensed pharmacists and healthcare professionals is here to ensure you receive the right medications, proper guidance, and the care you deserve.
+At نظارتي, we understand that clear vision is essential for your daily life. That's why we've built our reputation on trust, expertise, and a deep commitment to your eye health. Our team of licensed opticians and eye care professionals is here to ensure you receive the right eyewear, proper guidance, and the care you deserve.
 
 **Our Mission**
-To provide accessible, reliable, and professional pharmaceutical services that enhance the health and quality of life for our customers. We strive to be your first choice for all your medication and health product needs.
+To provide accessible, reliable, and professional optical services that enhance vision and quality of life for our customers. We strive to be your first choice for all your eyewear and eye care needs.
 
-**Why Choose الليثي صيدلية?**
-- **Licensed Pharmacists**: Our team of experienced pharmacists is available to answer your questions and provide medication counseling
-- **Quality Products**: We carry only FDA-approved medications and high-quality health products from trusted manufacturers
-- **Convenient Service**: Easy online ordering, prescription refills, and fast delivery to your doorstep
-- **Privacy & Security**: Your health information is protected with the highest standards of privacy and security
-- **Competitive Pricing**: We offer competitive prices and accept most insurance plans
+**Why Choose نظارتي?**
+- **Licensed Opticians**: Our team of experienced opticians is available to answer your questions and provide eyewear counseling
+- **Quality Products**: We carry only high-quality eyewear and eye care products from trusted manufacturers
+- **Convenient Service**: Easy online ordering, prescription eyewear, and fast delivery to your doorstep
+- **Privacy & Security**: Your eye health information is protected with the highest standards of privacy and security
+- **Competitive Pricing**: We offer competitive prices and accept most vision insurance plans
 
 **Our Services**
-- Prescription medications and refills
-- Over-the-counter medications and health products
-- Vitamins and nutritional supplements
-- Medication therapy management
-- Health screenings and consultations
-- Immunization services
+- Prescription eyewear and refills
+- Contact lenses and solutions
+- Sunglasses and protective eyewear
+- Eye care products and accessories
+- Vision consultations and fittings
+- Frame adjustments and repairs
 
-Thank you for choosing الليثي صيدلية. Your health is our priority, and we're here to serve you with care, expertise, and dedication.`,
+Thank you for choosing نظارتي. Your vision is our priority, and we're here to serve you with care, expertise, and dedication.`,
       isPublished: true,
     },
     {
@@ -861,44 +861,44 @@ We look forward to assisting you! Your satisfaction is our priority.
     {
       title: 'Help',
       slug: 'help',
-      content: `Welcome to الليثي صيدلية's Help Center! We're here to assist you with all your pharmaceutical needs and questions. Whether you need help with prescriptions, medication information, or general صيدلية services, our comprehensive help resources are designed to provide you with the information you need.
+      content: `Welcome to نظارتي's Help Center! We're here to assist you with all your optical needs and questions. Whether you need help with prescriptions, eyewear information, or general optical services, our comprehensive help resources are designed to provide you with the information you need.
 
 **Prescription Services**
-Managing your prescriptions is easy with our online platform. You can:
-- **Order Refills**: Log into your account and request prescription refills online
-- **Transfer Prescriptions**: Transfer your prescriptions from other pharmacies
-- **Medication Information**: Access detailed information about your medications
-- **Dosage Reminders**: Set up reminders for when to take your medications
+Managing your eyewear prescriptions is easy with our online platform. You can:
+- **Order Refills**: Log into your account and request prescription eyewear refills online
+- **Transfer Prescriptions**: Transfer your prescriptions from other optical stores
+- **Prescription Information**: Access detailed information about your eyewear prescriptions
+- **Appointment Reminders**: Set up reminders for your eye exams and fittings
 
 **Ordering and Delivery**
-- **Prescription Orders**: Upload your prescription or have your doctor send it electronically
-- **Over-the-Counter Products**: Browse and order health products, vitamins, and supplements
+- **Prescription Orders**: Upload your prescription or have your eye doctor send it electronically
+- **Eyewear Products**: Browse and order glasses, contact lenses, and eye care accessories
 - **Shipping Options**: Choose from standard (3-5 days), express (1-2 days), or same-day delivery
 - **Tracking**: Track your order status through your account or email notifications
 
 **Account Management**
 - **Profile Updates**: Keep your personal information, insurance details, and delivery addresses current
-- **Order History**: View past orders and prescription refills
-- **Auto-Refill**: Set up automatic refills for your regular medications
-- **Insurance Information**: Update and manage your insurance coverage
+- **Order History**: View past orders and prescription eyewear refills
+- **Auto-Refill**: Set up automatic refills for your regular contact lenses
+- **Insurance Information**: Update and manage your vision insurance coverage
 
-**Medication Safety**
-- **Drug Interactions**: Check for potential interactions between your medications
-- **Side Effects**: Learn about possible side effects and when to contact your doctor
-- **Storage Instructions**: Get proper storage information for your medications
-- **Expiration Dates**: Track medication expiration dates and receive reminders
+**Eye Care Safety**
+- **Lens Compatibility**: Check for compatibility between different contact lens types
+- **Care Instructions**: Learn about proper care for your eyewear and contact lenses
+- **Storage Instructions**: Get proper storage information for your eyewear and solutions
+- **Expiration Dates**: Track solution expiration dates and receive reminders
 
 **Insurance and Billing**
-- **Insurance Processing**: We accept most major insurance plans
+- **Insurance Processing**: We accept most major vision insurance plans
 - **Copay Information**: View your copay amounts before ordering
 - **Billing Questions**: Get help with billing issues or insurance claims
 - **Payment Options**: Use credit cards, insurance, or other accepted payment methods
 
 **Emergency Information**
-For medical emergencies, call 911 immediately. For urgent medication questions outside business hours, call our 24-hour pharmacist hotline at +1 (555) 123-4568.
+For eye emergencies, call 911 immediately. For urgent eyewear questions outside business hours, call our 24-hour optical support hotline at +1 (555) 123-4568.
 
 **Contact Support**
-Our صيدلية team is available to help with any questions about your medications, orders, or general health information. Contact us via phone, email, or live chat during business hours.`,
+Our optical team is available to help with any questions about your eyewear, orders, or general eye care information. Contact us via phone, email, or live chat during business hours.`,
       isPublished: true,
     },
     {
@@ -923,25 +923,25 @@ We strive to ensure all product descriptions, pricing, and availability informat
     {
       title: 'Customer Service',
       slug: 'customer-service',
-      content: `At الليثي صيدلية, we're committed to providing exceptional customer service and support for all your pharmaceutical needs. Our dedicated team is here to help you with any questions, concerns, or assistance you may need.
+      content: `At نظارتي, we're committed to providing exceptional customer service and support for all your optical needs. Our dedicated team is here to help you with any questions, concerns, or assistance you may need.
 
 **Contact Information**
 - **Phone**: +1 (555) 123-4567
-- **Email**: customer.service@الليثي-صيدلية.com
-- **Address**: 456 Health Plaza, Medical District, CA 90210
+- **Email**: customer.service@نظارتي.com
+- **Address**: 456 Optics Plaza, Vision District, CA 90210
 - **Hours**: Monday-Friday 8:00 AM - 8:00 PM, Saturday 9:00 AM - 6:00 PM, Sunday 10:00 AM - 4:00 PM
 
 **Prescription Services**
 - **Prescription Refills**: Order refills online or call us directly
-- **New Prescriptions**: Drop off prescriptions in person or have your doctor send them electronically
-- **Medication Counseling**: Our pharmacists are available for consultation about your medications
-- **Insurance Processing**: We accept most major insurance plans and can help with coverage questions
+- **New Prescriptions**: Drop off prescriptions in person or have your eye doctor send them electronically
+- **Eyewear Counseling**: Our opticians are available for consultation about your eyewear
+- **Insurance Processing**: We accept most major vision insurance plans and can help with coverage questions
 
 **Online Services**
 - **Account Management**: Update your profile, manage prescriptions, and view order history
-- **Auto-Refill**: Set up automatic refills for your regular medications
-- **Medication Reminders**: Receive notifications when it's time to refill or take your medications
-- **Health Information**: Access educational materials and health resources
+- **Auto-Refill**: Set up automatic refills for your regular contact lenses
+- **Appointment Reminders**: Receive notifications when it's time for your eye exam or fitting
+- **Eye Care Information**: Access educational materials and eye health resources
 
 **Shipping & Delivery**
 - **Standard Delivery**: 3-5 business days
@@ -951,17 +951,17 @@ We strive to ensure all product descriptions, pricing, and availability informat
 
 **Returns & Refunds**
 - **Unopened Products**: Full refund within 30 days
-- **Prescription Medications**: Cannot be returned for safety reasons
+- **Prescription Eyewear**: Cannot be returned for safety reasons
 - **Damaged Items**: Immediate replacement or refund
-- **Wrong Items**: Free replacement with correct medication
+- **Wrong Items**: Free replacement with correct eyewear
 
 **Privacy & Security**
-Your health information is protected by HIPAA regulations and our strict privacy policies. We never share your personal or medical information without your explicit consent.
+Your eye health information is protected by HIPAA regulations and our strict privacy policies. We never share your personal or medical information without your explicit consent.
 
 **Emergency Services**
-For medical emergencies, please call 911 or go to the nearest emergency room immediately. For urgent medication questions outside of business hours, call our 24-hour pharmacist hotline at +1 (555) 123-4568.
+For eye emergencies, please call 911 or go to the nearest emergency room immediately. For urgent eyewear questions outside of business hours, call our 24-hour optical support hotline at +1 (555) 123-4568.
 
-We're here to help you maintain your health and wellness. Don't hesitate to reach out to us with any questions or concerns.`,
+We're here to help you maintain clear vision and eye health. Don't hesitate to reach out to us with any questions or concerns.`,
       isPublished: true,
     },
     {
@@ -1136,7 +1136,7 @@ For questions about shipping, please contact our customer service team.`,
       href: '/search?tag=todays-deal',
     },
     {
-      name: 'New Medications',
+      name: 'New Eyewear',
       href: '/search?tag=new-arrival',
     },
     {
@@ -1254,7 +1254,7 @@ For questions about shipping, please contact our customer service team.`,
       taxSettings: {
         taxRate: 7.5,
         taxIncluded: false,
-        taxExemptCategories: ['prescription-medications', 'medical-devices'],
+        taxExemptCategories: ['prescription-eyewear', 'optical-devices'],
         taxExemptThreshold: 0,
       },
       productPricing: {
@@ -1267,14 +1267,14 @@ For questions about shipping, please contact our customer service team.`,
             startDate: '2024-12-01',
             endDate: '2024-12-31',
             discountRate: 15,
-            applicableCategories: ['vitamins', 'supplements', 'cold-flu'],
+            applicableCategories: ['sunglasses', 'protective-eyewear', 'computer-glasses'],
           },
           {
-            name: 'Summer Wellness',
+            name: 'Summer Vision',
             startDate: '2024-06-01',
             endDate: '2024-08-31',
             discountRate: 20,
-            applicableCategories: ['sunscreen', 'hydration', 'vitamins'],
+            applicableCategories: ['sunglasses', 'contact-lenses', 'eye-care'],
           },
         ],
       },

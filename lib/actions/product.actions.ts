@@ -34,13 +34,24 @@ const setGlobalCachedData = <T>(cacheKey: string, data: T): void => {
 // Centralized cached categories (shared by header and homepage)
 const getCachedCategories = unstable_cache(
   async () => {
-    const categories = await prisma.product.findMany({
-      where: { isPublished: true },
-      select: { category: true },
-      distinct: ['category'],
-      orderBy: { category: 'asc' }
-    })
-    return categories.map((c: any) => c.category)
+    try {
+      // First try to get categories from the Category model
+      const categories = await prisma.category.findMany({
+        where: { isActive: true },
+        select: { name: true },
+        orderBy: { sortOrder: 'asc' }
+      })
+      return categories.map((c: any) => c.name)
+    } catch (error) {
+      // Fallback to extracting from products if Category model doesn't exist yet
+      const categories = await prisma.product.findMany({
+        where: { isPublished: true },
+        select: { category: true },
+        distinct: ['category'],
+        orderBy: { category: 'asc' }
+      })
+      return categories.map((c: any) => c.category)
+    }
   },
   ['categories'],
   { revalidate: 300, tags: ['categories'] }
@@ -269,10 +280,28 @@ export async function getAllProductsForAdmin({
 
 export async function getAllCategories() {
   try {
-    return await getCachedCategories()
+    // Force a fresh database query to get current categories
+    const categories = await prisma.category.findMany({
+      where: { isActive: true },
+      select: { name: true },
+      orderBy: { sortOrder: 'asc' }
+    })
+    return categories.map((c: any) => c.name)
   } catch (error) {
     console.error('Error in getAllCategories:', error)
-    return []
+    // Fallback to extracting from products if Category model doesn't exist
+    try {
+      const categories = await prisma.product.findMany({
+        where: { isPublished: true },
+        select: { category: true },
+        distinct: ['category'],
+        orderBy: { category: 'asc' }
+      })
+      return categories.map((c: any) => c.category)
+    } catch (fallbackError) {
+      console.error('Fallback error in getAllCategories:', fallbackError)
+      return []
+    }
   }
 }
 

@@ -29,7 +29,7 @@ const signInDefaultValues = { phone: '', password: '' };
 
 export default function CredentialsSignInForm() {
   // const { site } = data.settings[0];
-  const site = { name: 'الليثي صيدلية' };
+  const site = { name: 'نظارتي' };
   const searchParams = useSearchParams()
   const router = useRouter()
   const callbackUrl = searchParams.get('callbackUrl') || '/'

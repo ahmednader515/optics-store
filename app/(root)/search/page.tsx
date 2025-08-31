@@ -246,7 +246,7 @@ async function SearchFiltersSection({ params }: { params: any }) {
   })
   
   const categoryList = categories.map((c: any) => c.category)
-  const tags = ['best-seller', 'featured', 'new-arrival', 'todays-deal', 'pain-relief', 'vitamins', 'allergy', 'digestive', 'cold-flu']
+  const tags = ['best-seller', 'featured', 'new-arrival', 'todays-deal', 'sunglasses', 'contact-lenses', 'reading-glasses', 'computer-glasses', 'eye-care']
 
   return (
     <div className='w-full'>

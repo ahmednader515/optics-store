@@ -19,6 +19,7 @@ async function main() {
   await prisma.userAddress.deleteMany()
   await prisma.user.deleteMany()
   await prisma.product.deleteMany()
+  await prisma.category.deleteMany()
   await prisma.setting.deleteMany()
   await prisma.webPage.deleteMany()
 
@@ -54,6 +55,30 @@ async function main() {
   )
 
   console.log(`👥 Created ${users.length} users`)
+
+  // Create categories
+  const categories = await Promise.all(
+    [
+      { name: 'النظارات الطبية', description: 'نظارات طبية عالية الجودة', slug: 'medical-glasses', sortOrder: 0 },
+      { name: 'النظارات الشمسية', description: 'نظارات شمسية أنيقة', slug: 'sunglasses', sortOrder: 1 },
+      { name: 'العدسات اللاصقة', description: 'عدسات لاصقة مريحة', slug: 'contact-lenses', sortOrder: 2 },
+      { name: 'مستلزمات العناية', description: 'منتجات العناية بالعين', slug: 'eye-care', sortOrder: 3 },
+      { name: 'إطارات النظارات', description: 'إطارات عصرية وأنيقة', slug: 'frames', sortOrder: 4 },
+      { name: 'أدوات البصريات', description: 'أدوات ومعدات البصريات', slug: 'optical-tools', sortOrder: 5 },
+    ].map((categoryData) =>
+      prisma.category.create({
+        data: {
+          name: categoryData.name,
+          description: categoryData.description,
+          slug: categoryData.slug,
+          isActive: true,
+          sortOrder: categoryData.sortOrder,
+        }
+      })
+    )
+  )
+
+  console.log(`📂 Created ${categories.length} categories`)
 
   // Create products
   const products = await Promise.all(

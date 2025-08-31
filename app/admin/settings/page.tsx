@@ -19,7 +19,7 @@ export default async function SettingsPage() {
       <div>
         <h1 className='text-3xl font-bold mb-2'>إعدادات الموقع</h1>
         <p className='text-muted-foreground'>
-          قم بإدارة إعدادات الكاروسيل، أوقات التوصيل، الأسعار، والضرائب
+          قم بإدارة إعدادات الكاروسيل، الفئات، أوقات التوصيل، الأسعار، والضرائب
         </p>
       </div>
       

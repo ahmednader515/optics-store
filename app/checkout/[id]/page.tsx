@@ -1,0 +1,33 @@
+import { notFound } from 'next/navigation'
+import React from 'react'
+
+import { auth } from '@/auth'
+import { getOrderById } from '@/lib/actions/order.actions'
+import PaymentForm from './payment-form'
+
+export const metadata = {
+  title: 'إتمام الطلب',
+}
+
+const CheckoutPaymentPage = async (props: {
+  params: Promise<{
+    id: string
+  }>
+}) => {
+  const params = await props.params
+
+  const { id } = params
+
+  const order = await getOrderById(id)
+  if (!order) notFound()
+
+  const session = await auth()
+
+  return (
+    <PaymentForm
+      order={order}
+    />
+  )
+}
+
+export default CheckoutPaymentPage

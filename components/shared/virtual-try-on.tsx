@@ -56,6 +56,10 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
     return () => mql.removeEventListener?.('change', update)
   }, [])
 
+  // Performance optimization: reduce detection frequency on mobile
+  const detectionIntervalRef = React.useRef<number>(0)
+  const lastDetectionTimeRef = React.useRef<number>(0)
+
   // keep refs in sync to avoid stale closure in RAF loop
   const sizeScaleRef = React.useRef<number>(1.0)
   React.useEffect(() => {
@@ -78,8 +82,8 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
       audio: false,
       video: {
         facingMode: isFrontCamera ? 'user' : 'environment',
-        width: { ideal: 1280 },
-        height: { ideal: 720 },
+        width: { ideal: isSmallScreen ? 640 : 1280 },
+        height: { ideal: isSmallScreen ? 480 : 720 },
       },
     }
     // Acquire camera only — show error ONLY if this step fails
@@ -197,6 +201,16 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
         rafRef.current = requestAnimationFrame(loop)
         return
       }
+      
+      // Performance optimization: throttle detection on mobile
+      const now = performance.now()
+      const detectionInterval = isSmallScreen ? 100 : 33 // 10fps on mobile, 30fps on desktop
+      if (now - lastDetectionTimeRef.current < detectionInterval) {
+        rafRef.current = requestAnimationFrame(loop)
+        return
+      }
+      lastDetectionTimeRef.current = now
+      
       try {
         const container = containerRef.current
         const overlayEl = overlayRef.current
@@ -225,7 +239,6 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
         let targetRot = smoothRotRef.current
 
         if (landmarkerRef.current) {
-          const now = performance.now()
           const results = await landmarkerRef.current.detectForVideo(video, now)
           const lm = results?.faceLandmarks?.[0]
           if (lm && lm.length) {
@@ -282,10 +295,10 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
           }
         }
 
-        // Exponential smoothing
-        const posAlpha = 0.3
-        const scaleAlpha = 0.2
-        const rotAlpha = 0.35
+        // Exponential smoothing - more aggressive on mobile for better performance
+        const posAlpha = isSmallScreen ? 0.4 : 0.3
+        const scaleAlpha = isSmallScreen ? 0.3 : 0.2
+        const rotAlpha = isSmallScreen ? 0.4 : 0.35
         const sx = smoothPosRef.current.x * (1 - posAlpha) + targetX * posAlpha
         const sy = smoothPosRef.current.y * (1 - posAlpha) + targetY * posAlpha
         const ss = smoothScaleRef.current * (1 - scaleAlpha) + targetScale * scaleAlpha

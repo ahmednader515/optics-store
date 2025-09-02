@@ -319,7 +319,8 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
         style={{ 
           aspectRatio: isSmallScreen ? '9 / 16' : '16 / 9', 
           transform: isFrontCamera ? 'scaleX(-1)' as any : undefined,
-          minHeight: isSmallScreen ? '400px' : undefined
+          minHeight: isSmallScreen ? '400px' : undefined,
+          maxHeight: isSmallScreen ? '80vh' : undefined
         }}
       >
         <video

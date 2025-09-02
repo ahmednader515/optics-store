@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { Slider } from '@/components/ui/slider'
+import { Button } from '@/components/ui/button'
 
 type VirtualTryOnProps = {
   overlayImageUrl?: string
@@ -357,7 +357,7 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
             transformOrigin: 'center center',
           }}
         >
-          {overlayImageUrl ? (
+          {overlayImageUrl && overlayImageUrl.trim() !== '' ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={overlayImageUrl}
@@ -384,21 +384,31 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
         </div>
       </div>
 
-      {/* Glasses size slider */}
+      {/* Glasses size controls */}
       <div className="flex flex-col gap-2 px-2">
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-muted-foreground w-20">حجم النظارات</span>
-          <Slider
-            value={[sizeScale]}
-            onValueChange={(v) => setSizeScale(v[0])}
-            min={0.5}
-            max={2.0}
-            step={0.05}
-            className="w-full"
-          />
-          <span className="text-xs text-muted-foreground w-8">
-            {Math.round(sizeScale * 100)}%
-          </span>
+        <div className="flex items-center justify-center gap-4">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => setSizeScale(Math.min(2.0, sizeScale + 0.2))}
+            className="h-12 w-12 p-0 bg-orange-600 hover:bg-orange-700 hover:text-white text-white border-orange-600 disabled:bg-gray-400 disabled:border-gray-400"
+            disabled={sizeScale >= 2.0}
+          >
+            +
+          </Button>
+          <div className="text-center min-w-[60px]">
+            <div className="text-sm font-medium">{Math.round(sizeScale * 100)}%</div>
+            <div className="text-xs text-muted-foreground">حجم النظارات</div>
+          </div>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => setSizeScale(Math.max(0.5, sizeScale - 0.2))}
+            className="h-12 w-12 p-0 bg-orange-600 hover:bg-orange-700 hover:text-white text-white border-orange-600 disabled:bg-gray-400 disabled:border-gray-400"
+            disabled={sizeScale <= 0.5}
+          >
+            −
+          </Button>
         </div>
       </div>
     </div>

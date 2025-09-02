@@ -287,7 +287,7 @@ const ProductForm = ({
                   {(() => {
                     const vtoTag = (form.watch('tags') || []).find((t) => t.startsWith('vto='))
                     const vtoUrl = vtoTag ? vtoTag.slice(4) : ''
-                    if (!vtoUrl) return null
+                    if (!vtoUrl || vtoUrl.trim() === '') return null
                     return (
                       <div className='mt-2'>
                         <Image src={vtoUrl} alt='VTO' width={240} height={120} className='border rounded-md' />

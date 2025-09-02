@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-// Controls removed per request; no UI imports needed
+import { Slider } from '@/components/ui/slider'
 
 type VirtualTryOnProps = {
   overlayImageUrl?: string
@@ -37,7 +37,8 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
 
   // Heuristics for overlay fitting
   const overlayAspectApprox = 0.38 // approximate height/width of the glasses overlay
-  const widthMultiplier = 2.35 // overlay width relative to eye distance
+  const baseWidthMultiplier = 2.35 // base overlay width relative to eye distance
+  const [sizeScale, setSizeScale] = React.useState(1.0) // user-adjustable scale factor
   const verticalOffsetRatio = 0.38 // fraction of width to raise from mid-eye level
 
   const isDraggingRef = React.useRef(false)
@@ -55,10 +56,12 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
     return () => mql.removeEventListener?.('change', update)
   }, [])
 
-  // keep ref in sync to avoid stale closure in RAF loop
+  // keep refs in sync to avoid stale closure in RAF loop
+  const sizeScaleRef = React.useRef<number>(1.0)
   React.useEffect(() => {
     autoFollowRef.current = autoFollow
-  }, [autoFollow])
+    sizeScaleRef.current = sizeScale
+  }, [autoFollow, sizeScale])
 
   React.useEffect(() => {
     startCamera()
@@ -247,7 +250,7 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
             const angleRad = Math.atan2(rightCenter.y - leftCenter.y, rightCenter.x - leftCenter.x)
 
             // Map to overlay transform: width scaled relative to eye distance
-            const desiredOverlayWidth = eyeDist * widthMultiplier
+            const desiredOverlayWidth = eyeDist * baseWidthMultiplier * sizeScaleRef.current
             targetScale = desiredOverlayWidth / 320
             targetRot = (angleRad * 180) / Math.PI
             targetX = mid.x - (desiredOverlayWidth / 2)
@@ -268,7 +271,7 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
           if (faces && faces.length > 0) {
             const box = faces[0].boundingBox
             const faceWidth = box.width * scaleCover
-            let w = faceWidth * 1.35
+            let w = faceWidth * 1.35 * sizeScaleRef.current
             let x = offsetX + box.x * scaleCover + (box.width * scaleCover) / 2 - w / 2
             let y = offsetY + box.y * scaleCover + (box.height * scaleCover) * 0.08
             // Container is mirrored for front camera, so no X flip here
@@ -367,7 +370,23 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
         </div>
       </div>
 
-      {/* Controls removed per request */}
+      {/* Glasses size slider */}
+      <div className="flex flex-col gap-2 px-2">
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-muted-foreground w-20">حجم النظارات</span>
+          <Slider
+            value={[sizeScale]}
+            onValueChange={(v) => setSizeScale(v[0])}
+            min={0.5}
+            max={2.0}
+            step={0.05}
+            className="w-full"
+          />
+          <span className="text-xs text-muted-foreground w-8">
+            {Math.round(sizeScale * 100)}%
+          </span>
+        </div>
+      </div>
     </div>
   )
 }

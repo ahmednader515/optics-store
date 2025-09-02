@@ -245,6 +245,59 @@ const ProductForm = ({
               )}
             />
           </div>
+
+          {/* Virtual Try-On image upload (stored in tags as vto=URL) */}
+          <div className='flex flex-col gap-2'>
+            <FormItem className='w-full'>
+              <FormLabel className='text-gray-900 font-semibold'>صورة التجربة الافتراضية (اختياري)</FormLabel>
+              <Card>
+                <CardContent className='space-y-2 mt-2'>
+                  <div className='flex items-center justify-between'>
+                    <div className='text-sm text-gray-600'>ارفع صورة إطار شفافة PNG لتظهر على الوجه</div>
+                    {Array.isArray(form.watch('tags')) && form.watch('tags').some((t) => t.startsWith('vto=')) && (
+                      <button
+                        type='button'
+                        onClick={() => {
+                          const newTags = (form.getValues('tags') || []).filter((t) => !t.startsWith('vto='))
+                          form.setValue('tags', newTags)
+                        }}
+                        className='text-xs text-red-600 hover:underline'
+                      >
+                        إزالة
+                      </button>
+                    )}
+                  </div>
+                  <div className='flex items-center gap-3'>
+                    <FormControl>
+                      <UploadButton
+                        endpoint='imageUploader'
+                        onClientUploadComplete={(res: { url: string }[]) => {
+                          const url = res?.[0]?.url
+                          if (!url) return
+                          const otherTags = (form.getValues('tags') || []).filter((t) => !t.startsWith('vto='))
+                          form.setValue('tags', [...otherTags, `vto=${url}`])
+                        }}
+                        onUploadError={(error: Error) => {
+                          toast({ variant: 'destructive', description: `خطأ! ${error.message}` })
+                        }}
+                      />
+                    </FormControl>
+                    <div className='text-xs text-gray-500'>PNG بخلفية شفافة يفضل 1000px عرضًا</div>
+                  </div>
+                  {(() => {
+                    const vtoTag = (form.watch('tags') || []).find((t) => t.startsWith('vto='))
+                    const vtoUrl = vtoTag ? vtoTag.slice(4) : ''
+                    if (!vtoUrl) return null
+                    return (
+                      <div className='mt-2'>
+                        <Image src={vtoUrl} alt='VTO' width={240} height={120} className='border rounded-md' />
+                      </div>
+                    )
+                  })()}
+                </CardContent>
+              </Card>
+            </FormItem>
+          </div>
           <div className='flex flex-col gap-5 md:flex-row'>
             <FormField
               control={form.control}

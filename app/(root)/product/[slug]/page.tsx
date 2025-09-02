@@ -8,6 +8,7 @@ import AddToBrowsingHistory from '@/components/shared/product/add-to-browsing-hi
 import Rating from '@/components/shared/product/rating'
 import ReviewList from './review-list'
 import { Separator } from '@/components/ui/separator'
+import TryOnDialog from '@/components/shared/product/try-on-dialog'
 
 interface ProductPageProps {
   params: Promise<{
@@ -139,6 +140,16 @@ async function ProductHeader({ slug }: { slug: string }) {
 
           <div>
             <AddToCart product={productData} />
+            <div className='mt-3'>
+              {(() => {
+                const vtoTag = Array.isArray(productData.tags)
+                  ? productData.tags.find((t: string) => typeof t === 'string' && t.startsWith('vto='))
+                  : undefined
+                const vtoUrl = vtoTag ? vtoTag.slice(4) : undefined
+                const overlayUrl = vtoUrl || productData.images?.[0]
+                return <TryOnDialog overlayImageUrl={overlayUrl} />
+              })()}
+            </div>
           </div>
 
           <Separator />

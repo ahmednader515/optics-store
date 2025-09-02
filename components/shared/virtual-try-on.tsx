@@ -44,6 +44,17 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
   const dragStartRef = React.useRef<Point | null>(null)
   const startPosRef = React.useRef<Point>({ x: 0, y: 0 })
 
+  // Responsive: use a taller preview on small screens
+  const [isSmallScreen, setIsSmallScreen] = React.useState(false)
+  React.useEffect(() => {
+    if (typeof window === 'undefined' || !('matchMedia' in window)) return
+    const mql = window.matchMedia('(max-width: 640px)')
+    const update = () => setIsSmallScreen(mql.matches)
+    update()
+    mql.addEventListener?.('change', update)
+    return () => mql.removeEventListener?.('change', update)
+  }, [])
+
   // keep ref in sync to avoid stale closure in RAF loop
   React.useEffect(() => {
     autoFollowRef.current = autoFollow
@@ -302,7 +313,11 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
       <div
         ref={containerRef}
         className="relative w-full overflow-hidden rounded-md border bg-black"
-        style={{ aspectRatio: '16 / 9', transform: isFrontCamera ? 'scaleX(-1)' as any : undefined }}
+        style={{ 
+          aspectRatio: isSmallScreen ? '9 / 16' : '16 / 9', 
+          transform: isFrontCamera ? 'scaleX(-1)' as any : undefined,
+          minHeight: isSmallScreen ? '400px' : undefined
+        }}
       >
         <video
           ref={videoRef}

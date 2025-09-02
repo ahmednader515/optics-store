@@ -1208,6 +1208,12 @@ For questions about shipping, please contact our customer service team.`,
           image: '/images/banner2.jpg',
           url: '/search?category=العدسات اللاصقة',
         },
+        {
+          title: 'اختبار اختيار النظارات المناسبة',
+          buttonCaption: 'ابدأ الاختبار',
+          image: '/images/banner1.jpg',
+          url: '/quiz',
+        },
       ],
       availableLanguages: [
         { code: 'ar-SA', name: 'العربية' },

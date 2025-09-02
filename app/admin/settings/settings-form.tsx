@@ -9,10 +9,29 @@ import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from '@/hooks/use-toast'
-import { Plus, Trash2, Save, Image as ImageIcon, Upload, Truck, Calculator, DollarSign } from 'lucide-react'
+import { Plus, Trash2, Save, Image as ImageIcon, Upload, Truck, Calculator, DollarSign, GripVertical } from 'lucide-react'
 import data from '@/lib/data'
 import { updateSetting } from '@/lib/actions/setting.actions'
 import CategoryManager from '@/components/admin/category-manager'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import {
+  useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 interface CarouselItem {
   title: string
@@ -27,6 +46,147 @@ interface SeasonalDiscount {
   endDate: string
   discountRate: number
   applicableCategories: string[]
+}
+
+// Sortable Carousel Item Component
+function SortableCarouselItem({ 
+  item, 
+  index, 
+  onUpdate, 
+  onRemove, 
+  onImageUpload,
+  isLast 
+}: {
+  item: CarouselItem
+  index: number
+  onUpdate: (index: number, field: keyof CarouselItem, value: string) => void
+  onRemove: (index: number) => void
+  onImageUpload: (index: number, file: File) => void
+  isLast: boolean
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.title + index })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`border rounded-lg p-4 space-y-4 ${isDragging ? 'shadow-lg' : ''}`}
+    >
+      <div className='flex items-center justify-between'>
+        <div className='flex items-center gap-2'>
+          <div
+            {...attributes}
+            {...listeners}
+            className='cursor-grab hover:cursor-grabbing p-1 hover:bg-gray-100 rounded'
+          >
+            <GripVertical className='h-4 w-4 text-gray-500' />
+          </div>
+          <h4 className='font-semibold'>عنصر الكاروسيل {index + 1}</h4>
+        </div>
+        <Button
+          variant='destructive'
+          size='sm'
+          onClick={() => onRemove(index)}
+        >
+          <Trash2 className='h-4 w-4 ml-2' />
+          حذف
+        </Button>
+      </div>
+      
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+        <div className='space-y-2'>
+          <Label htmlFor={`carouselTitle${index}`}>العنوان</Label>
+          <Input
+            id={`carouselTitle${index}`}
+            value={item.title}
+            onChange={(e) => onUpdate(index, 'title', e.target.value)}
+            placeholder='عنوان الكاروسيل'
+          />
+        </div>
+        <div className='space-y-2'>
+          <Label htmlFor={`carouselButton${index}`}>نص الزر</Label>
+          <Input
+            id={`carouselButton${index}`}
+            value={item.buttonCaption}
+            onChange={(e) => onUpdate(index, 'buttonCaption', e.target.value)}
+            placeholder='نص الزر'
+          />
+        </div>
+      </div>
+      
+      <div className='space-y-4'>
+        <div className='space-y-2'>
+          <Label>صورة الكاروسيل</Label>
+          <div className='flex items-center gap-4'>
+            <div className='w-20 h-12 bg-gray-100 rounded border flex items-center justify-center overflow-hidden'>
+              {item.image ? (
+                <img 
+                  src={item.image} 
+                  alt={item.title}
+                  className='w-full h-full object-cover'
+                />
+              ) : (
+                <ImageIcon className='h-6 w-6 text-gray-400' />
+              )}
+            </div>
+            <div className='flex-1'>
+              <Input
+                value={item.image}
+                onChange={(e) => onUpdate(index, 'image', e.target.value)}
+                placeholder='رابط الصورة'
+              />
+            </div>
+            <div>
+              <input
+                type='file'
+                accept='image/*'
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) onImageUpload(index, file)
+                }}
+                className='hidden'
+                id={`imageUpload${index}`}
+              />
+              <Button
+                type='button'
+                variant='outline'
+                size='sm'
+                onClick={() => document.getElementById(`imageUpload${index}`)?.click()}
+              >
+                <Upload className='h-4 w-4 ml-2' />
+                رفع صورة
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        <div className='space-y-2'>
+          <Label htmlFor={`carouselUrl${index}`}>الرابط</Label>
+          <Input
+            id={`carouselUrl${index}`}
+            value={item.url}
+            onChange={(e) => onUpdate(index, 'url', e.target.value)}
+            placeholder='رابط الكاروسيل'
+          />
+        </div>
+      </div>
+      
+      {!isLast && <Separator />}
+    </div>
+  )
 }
 
 export default function SettingsForm({ setting }: { setting: any }) {
@@ -64,6 +224,14 @@ export default function SettingsForm({ setting }: { setting: any }) {
     ] as SeasonalDiscount[],
   })
   const [isLoading, setIsLoading] = useState(false)
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
 
   useEffect(() => {
     const settings = setting || data.settings[0]
@@ -123,6 +291,19 @@ export default function SettingsForm({ setting }: { setting: any }) {
         title: 'لا يمكن الحذف',
         description: 'يجب أن يحتوي الكاروسيل على عنصر واحد على الأقل',
         variant: 'destructive'
+      })
+    }
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (active.id !== over?.id) {
+      const oldIndex = carouselItems.findIndex(item => item.title + carouselItems.indexOf(item) === active.id)
+      const newIndex = carouselItems.findIndex(item => item.title + carouselItems.indexOf(item) === over?.id)
+
+      setCarouselItems((items) => {
+        return arrayMove(items, oldIndex, newIndex)
       })
     }
   }
@@ -237,97 +418,33 @@ export default function SettingsForm({ setting }: { setting: any }) {
               إضافة عنصر
             </Button>
           </div>
+          <p className='text-sm text-muted-foreground mt-2'>
+            اسحب العناصر باستخدام أيقونة السحب (⋮⋮) لإعادة ترتيبها
+          </p>
         </CardHeader>
         <CardContent className='space-y-6'>
-          {carouselItems.map((item, index) => (
-            <div key={index} className='border rounded-lg p-4 space-y-4'>
-              <div className='flex items-center justify-between'>
-                <h4 className='font-semibold'>عنصر الكاروسيل {index + 1}</h4>
-                <Button
-                  variant='destructive'
-                  size='sm'
-                  onClick={() => removeCarouselItem(index)}
-                  disabled={carouselItems.length <= 1}
-                >
-                  <Trash2 className='h-4 w-4 ml-2' />
-                  حذف
-                </Button>
-              </div>
-              
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div className='space-y-2'>
-                  <Label htmlFor={`carouselTitle${index}`}>العنوان</Label>
-                  <Input
-                    id={`carouselTitle${index}`}
-                    value={item.title}
-                    onChange={(e) => handleCarouselChange(index, 'title', e.target.value)}
-                    placeholder='عنوان الكاروسيل'
-                  />
-                </div>
-                <div className='space-y-2'>
-                  <Label htmlFor={`carouselButton${index}`}>نص الزر</Label>
-                  <Input
-                    id={`carouselButton${index}`}
-                    value={item.buttonCaption}
-                    onChange={(e) => handleCarouselChange(index, 'buttonCaption', e.target.value)}
-                    placeholder='نص الزر'
-                  />
-                </div>
-              </div>
-              
-              <div className='space-y-4'>
-                <div className='space-y-2'>
-                  <Label>صورة الكاروسيل</Label>
-                  <div className='flex items-center gap-4'>
-                    {/* Current Image Preview */}
-                    <div className='w-32 h-20 rounded-lg overflow-hidden border border-gray-200'>
-                      <img
-                        src={item.image}
-                        alt={`Carousel ${index + 1}`}
-                        className='w-full h-full object-cover'
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement
-                          target.src = '/images/placeholder.jpg'
-                        }}
-                      />
-                    </div>
-                    
-                    {/* Upload Button */}
-                    <div className='space-y-2'>
-                      <input
-                        type='file'
-                        id={`imageUpload${index}`}
-                        accept='image/*'
-                        className='hidden'
-                        onChange={(e) => {
-                          const file = e.target.files?.[0]
-                          if (file) {
-                            handleImageUpload(index, file)
-                          }
-                        }}
-                      />
-                      <Button
-                        variant='outline'
-                        size='sm'
-                        onClick={() => document.getElementById(`imageUpload${index}`)?.click()}
-                      >
-                        <Upload className='h-4 w-4 ml-2' />
-                        رفع صورة جديدة
-                      </Button>
-                      <p className='text-xs text-muted-foreground'>
-                        الصورة الحالية: {item.image}
-                      </p>
-                      <p className='text-xs text-muted-foreground'>
-                        رابط الزر: {item.url}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {index < carouselItems.length - 1 && <Separator />}
-            </div>
-          ))}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={carouselItems.map((item, index) => item.title + index)}
+              strategy={verticalListSortingStrategy}
+            >
+              {carouselItems.map((item, index) => (
+                <SortableCarouselItem
+                  key={item.title + index}
+                  item={item}
+                  index={index}
+                  onUpdate={handleCarouselChange}
+                  onRemove={removeCarouselItem}
+                  onImageUpload={handleImageUpload}
+                  isLast={index === carouselItems.length - 1}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
         </CardContent>
       </Card>
 

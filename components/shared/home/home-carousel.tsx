@@ -20,11 +20,12 @@ export default function HomeCarousel({ carousels }: HomeCarouselProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isHovering, setIsHovering] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [hasUserInteracted, setHasUserInteracted] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   
-  // Auto-slide every 5 seconds (only when not hovering)
+  // Auto-slide every 5 seconds (only when not hovering and user hasn't interacted)
   useEffect(() => {
-    if (isHovering || !carousels || carousels.length === 0) return;
+    if (isHovering || hasUserInteracted || !carousels || carousels.length === 0) return;
 
     intervalRef.current = setInterval(() => {
       goToNext()
@@ -33,13 +34,16 @@ export default function HomeCarousel({ carousels }: HomeCarouselProps) {
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
+        intervalRef.current = null
       }
     }
-  }, [isHovering, carousels])
+  }, [isHovering, hasUserInteracted])
 
   const goToPrevious = () => {
     if (isTransitioning || !carousels || carousels.length === 0) return
     
+    setHasUserInteracted(true)
+    pauseAutoSlide()
     setIsTransitioning(true)
     setTimeout(() => {
       setCurrentSlide(prev => prev === 0 ? carousels.length - 1 : prev - 1)
@@ -50,6 +54,8 @@ export default function HomeCarousel({ carousels }: HomeCarouselProps) {
   const goToNext = () => {
     if (isTransitioning || !carousels || carousels.length === 0) return
     
+    setHasUserInteracted(true)
+    pauseAutoSlide()
     setIsTransitioning(true)
     setTimeout(() => {
       setCurrentSlide(prev => (prev + 1) % carousels.length)
@@ -60,6 +66,8 @@ export default function HomeCarousel({ carousels }: HomeCarouselProps) {
   const goToSlide = (index: number) => {
     if (isTransitioning || index === currentSlide || !carousels || carousels.length === 0) return
     
+    setHasUserInteracted(true)
+    pauseAutoSlide()
     setIsTransitioning(true)
     setTimeout(() => {
       setCurrentSlide(index)
@@ -77,6 +85,13 @@ export default function HomeCarousel({ carousels }: HomeCarouselProps) {
 
   const handleMouseLeave = () => {
     setIsHovering(false)
+  }
+
+  const pauseAutoSlide = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
   }
 
   // Early return if no carousels

@@ -70,6 +70,10 @@
     "zod": "^3.24.1",
     "zustand": "^5.0.2"
   },
+  "overrides": {
+    "@react-spring/three": "9.6.1",
+    "@react-three/fiber": "9.0.0-alpha.8"
+  },
   "devDependencies": {
     "@types/react": "^18",
     "@types/react-dom": "^18",

@@ -39,7 +39,7 @@ export default function VirtualTryOn({ overlayImageUrl }: VirtualTryOnProps) {
   const overlayAspectApprox = 0.38 // approximate height/width of the glasses overlay
   const baseWidthMultiplier = 2.35 // base overlay width relative to eye distance
   const [sizeScale, setSizeScale] = React.useState(1.0) // user-adjustable scale factor
-  const verticalOffsetRatio = 0.38 // fraction of width to raise from mid-eye level
+  const verticalOffsetRatio = 0.15 // fraction of width to raise from mid-eye level
 
   const isDraggingRef = React.useRef(false)
   const dragStartRef = React.useRef<Point | null>(null)

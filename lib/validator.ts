@@ -60,6 +60,15 @@ export const ProductInputSchema = z.object({
     .number()
     .int()
     .nonnegative('Number of sales must be a non-negative number'),
+  // 3D Model fields for virtual try-on
+  model3dUrl: z.string().url().optional(),
+  model3dScale: z.coerce.number().min(0.1).max(10).default(1.0),
+  model3dOffsetX: z.coerce.number().default(0.0),
+  model3dOffsetY: z.coerce.number().default(0.0),
+  model3dOffsetZ: z.coerce.number().default(0.0),
+  model3dRotationX: z.coerce.number().default(0.0),
+  model3dRotationY: z.coerce.number().default(0.0),
+  model3dRotationZ: z.coerce.number().default(0.0),
 })
 
 export const ProductUpdateSchema = ProductInputSchema.extend({

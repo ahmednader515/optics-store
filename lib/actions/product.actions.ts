@@ -102,6 +102,15 @@ export async function createProduct(data: IProductInput) {
         ratingDistribution: productData.ratingDistribution || null,
         numSales: productData.numSales,
         isPublished: productData.isPublished,
+        // 3D Model fields
+        model3dUrl: productData.model3dUrl,
+        model3dScale: productData.model3dScale,
+        model3dOffsetX: productData.model3dOffsetX,
+        model3dOffsetY: productData.model3dOffsetY,
+        model3dOffsetZ: productData.model3dOffsetZ,
+        model3dRotationX: productData.model3dRotationX,
+        model3dRotationY: productData.model3dRotationY,
+        model3dRotationZ: productData.model3dRotationZ,
       }
     })
     revalidatePath('/admin/products')
@@ -143,6 +152,15 @@ export async function updateProduct(data: z.infer<typeof ProductUpdateSchema>) {
         ratingDistribution: productData.ratingDistribution || null,
         numSales: productData.numSales,
         isPublished: productData.isPublished,
+        // 3D Model fields
+        model3dUrl: productData.model3dUrl,
+        model3dScale: productData.model3dScale,
+        model3dOffsetX: productData.model3dOffsetX,
+        model3dOffsetY: productData.model3dOffsetY,
+        model3dOffsetZ: productData.model3dOffsetZ,
+        model3dRotationX: productData.model3dRotationX,
+        model3dRotationY: productData.model3dRotationY,
+        model3dRotationZ: productData.model3dRotationZ,
       }
     })
     revalidatePath('/admin/products')

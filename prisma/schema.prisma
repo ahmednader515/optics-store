@@ -62,6 +62,15 @@ model Product {
   ratingDistribution Json?
   numSales           Int         @default(0)
   isPublished        Boolean     @default(false)
+  // 3D Model fields for virtual try-on
+  model3dUrl         String?     // URL to .glb/.gltf file
+  model3dScale       Float?      @default(1.0) // Scale multiplier
+  model3dOffsetX     Float?      @default(0.0) // X position offset
+  model3dOffsetY     Float?      @default(0.0) // Y position offset
+  model3dOffsetZ     Float?      @default(0.0) // Z position offset
+  model3dRotationX   Float?      @default(0.0) // X rotation offset in degrees
+  model3dRotationY   Float?      @default(0.0) // Y rotation offset in degrees
+  model3dRotationZ   Float?      @default(0.0) // Z rotation offset in degrees
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
   orderItems         OrderItem[]

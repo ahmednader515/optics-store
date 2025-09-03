@@ -147,7 +147,26 @@ async function ProductHeader({ slug }: { slug: string }) {
                   : undefined
                 const vtoUrl = vtoTag ? vtoTag.slice(4) : undefined
                 const overlayUrl = vtoUrl || productData.images?.[0]
-                return <TryOnDialog overlayImageUrl={overlayUrl} />
+                
+                // 3D model data
+                const model3dUrl = productData.model3dUrl
+                const model3dCalibration = model3dUrl ? {
+                  scale: productData.model3dScale || 1.0,
+                  offsetX: productData.model3dOffsetX || 0.0,
+                  offsetY: productData.model3dOffsetY || 0.0,
+                  offsetZ: productData.model3dOffsetZ || 0.0,
+                  rotationX: productData.model3dRotationX || 0.0,
+                  rotationY: productData.model3dRotationY || 0.0,
+                  rotationZ: productData.model3dRotationZ || 0.0,
+                } : undefined
+                
+                return (
+                  <TryOnDialog 
+                    overlayImageUrl={overlayUrl}
+                    model3dUrl={model3dUrl}
+                    model3dCalibration={model3dCalibration}
+                  />
+                )
               })()}
             </div>
           </div>

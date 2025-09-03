@@ -25,6 +25,20 @@ export const ourFileRouter = {
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
       return { uploadedBy: metadata.userId }
     }),
+
+  // 3D Model uploader for .glb/.gltf files
+  model3dUploader: f({ 
+    'model/gltf-binary': { maxFileSize: '50MB' },
+    'model/gltf+json': { maxFileSize: '50MB' }
+  })
+    .middleware(async () => {
+      const session = await auth()
+      if (!session) throw new UploadThingError('Unauthorized')
+      return { userId: session?.user?.id }
+    })
+    .onUploadComplete(async ({ metadata }) => {
+      return { uploadedBy: metadata.userId }
+    }),
 } satisfies FileRouter
 
 export type OurFileRouter = typeof ourFileRouter

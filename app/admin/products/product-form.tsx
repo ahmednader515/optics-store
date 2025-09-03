@@ -33,6 +33,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { toSlug } from '@/lib/utils'
 import { useLoading } from '@/hooks/use-loading'
 import { LoadingSpinner } from '@/components/shared/loading-overlay'
+import ClientOnly3DPreview from '@/components/shared/client-only-3d-preview'
 
 const productDefaultValues: IProductInput = {
   name: '',
@@ -53,6 +54,15 @@ const productDefaultValues: IProductInput = {
   colors: [],
   ratingDistribution: [],
   reviews: [],
+  // 3D Model fields
+  model3dUrl: undefined,
+  model3dScale: 1.0,
+  model3dOffsetX: 0.0,
+  model3dOffsetY: 0.0,
+  model3dOffsetZ: 0.0,
+  model3dRotationX: 0.0,
+  model3dRotationY: 0.0,
+  model3dRotationZ: 0.0,
 }
 
 const ProductForm = ({
@@ -67,6 +77,7 @@ const ProductForm = ({
   const router = useRouter()
   const [categories, setCategories] = useState<string[]>([])
   const [isLoadingCategories, setIsLoadingCategories] = useState(true)
+
   const { isLoading: isSubmitting, withLoading } = useLoading()
 
   const form = useForm<IProductInput>({
@@ -80,6 +91,18 @@ const ProductForm = ({
     shouldFocusError: false,
     shouldUnregister: false,
   })
+
+  // Explicitly register non-visual fields so setValue persists them on submit
+  useEffect(() => {
+    form.register('model3dUrl')
+    form.register('model3dScale')
+    form.register('model3dOffsetX')
+    form.register('model3dOffsetY')
+    form.register('model3dOffsetZ')
+    form.register('model3dRotationX')
+    form.register('model3dRotationY')
+    form.register('model3dRotationZ')
+  }, [form])
 
   // Fetch categories function
   const fetchCategories = async () => {
@@ -100,6 +123,23 @@ const ProductForm = ({
   useEffect(() => {
     fetchCategories()
   }, [type, product, productId])
+
+  // Reset form values when product data changes (for updates)
+  useEffect(() => {
+    if (product && type === 'Update') {
+      console.log('Resetting form with product data:', {
+        model3dUrl: product.model3dUrl,
+        model3dScale: product.model3dScale,
+        model3dOffsetX: product.model3dOffsetX,
+        model3dOffsetY: product.model3dOffsetY,
+        model3dOffsetZ: product.model3dOffsetZ,
+        model3dRotationX: product.model3dRotationX,
+        model3dRotationY: product.model3dRotationY,
+        model3dRotationZ: product.model3dRotationZ,
+      })
+      form.reset(product)
+    }
+  }, [product, type, form])
 
 
 
@@ -124,9 +164,18 @@ const ProductForm = ({
     }
 
     // Auto-generate slug from product name
+    const generatedSlug = toSlug(values.name)
+    if (!generatedSlug) {
+      toast({
+        variant: 'destructive',
+        description: 'يرجى إدخال اسم المنتج لإنشاء رابط المنتج',
+      })
+      return
+    }
+
     const productData = {
       ...values,
-      slug: toSlug(values.name)
+      slug: generatedSlug
     }
 
     await withLoading(
@@ -194,9 +243,21 @@ const ProductForm = ({
                     <Input 
                       {...field} 
                       className='border-gray-300 bg-white text-gray-900 focus:border-orange-500 focus:ring-orange-500'
+                      onChange={(e) => {
+                        field.onChange(e)
+                        // Auto-generate slug as user types
+                        const slug = toSlug(e.target.value)
+                        if (slug) {
+                          form.setValue('slug', slug)
+                        }
+                      }}
                     />
                   </FormControl>
-
+                  {field.value && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      رابط المنتج: {toSlug(field.value) || 'يرجى إدخال اسم صحيح'}
+                    </div>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -298,6 +359,73 @@ const ProductForm = ({
               </Card>
             </FormItem>
           </div>
+
+          {/* 3D Model Upload Section */}
+          <div className='flex flex-col gap-2'>
+            <FormItem className='w-full'>
+              <FormLabel className='text-gray-900 font-semibold'>النموذج ثلاثي الأبعاد (اختياري)</FormLabel>
+              <Card>
+                <CardContent className='space-y-4 mt-2'>
+                  <div className='flex items-center justify-between'>
+                    <div className='text-sm text-gray-600'>ارفع ملف .glb أو .gltf للنموذج ثلاثي الأبعاد</div>
+                    {form.watch('model3dUrl') && (
+                      <button
+                        type='button'
+                        onClick={() => {
+                          form.setValue('model3dUrl', undefined)
+                        }}
+                        className='text-xs text-red-600 hover:underline'
+                      >
+                        إزالة
+                      </button>
+                    )}
+                  </div>
+                  <div className='flex items-center gap-3'>
+                    <FormControl>
+                      <UploadButton
+                        endpoint='model3dUploader'
+                        onClientUploadComplete={(res: { url: string }[]) => {
+                          const url = res?.[0]?.url
+                          if (!url) return
+                          form.setValue('model3dUrl', url)
+                        }}
+                        onUploadError={(error: Error) => {
+                          toast({ variant: 'destructive', description: `خطأ! ${error.message}` })
+                        }}
+                      />
+                    </FormControl>
+                    <div className='text-xs text-gray-500'>ملفات .glb/.gltf حتى 50MB</div>
+                  </div>
+                  
+                  {/* 3D Model Preview and Calibration */}
+                  {form.watch('model3dUrl') && (
+                    <div className="min-h-[600px]">
+                      <ClientOnly3DPreview
+                        modelUrl={form.watch('model3dUrl')}
+                        scale={form.watch('model3dScale') || 1.0}
+                        offsetX={form.watch('model3dOffsetX') || 0.0}
+                        offsetY={form.watch('model3dOffsetY') || 0.0}
+                        offsetZ={form.watch('model3dOffsetZ') || 0.0}
+                        rotationX={form.watch('model3dRotationX') || 0.0}
+                        rotationY={form.watch('model3dRotationY') || 0.0}
+                        rotationZ={form.watch('model3dRotationZ') || 0.0}
+                        onCalibrationChange={(calibration) => {
+                          form.setValue('model3dScale', calibration.scale)
+                          form.setValue('model3dOffsetX', calibration.offsetX)
+                          form.setValue('model3dOffsetY', calibration.offsetY)
+                          form.setValue('model3dOffsetZ', calibration.offsetZ)
+                          form.setValue('model3dRotationX', calibration.rotationX)
+                          form.setValue('model3dRotationY', calibration.rotationY)
+                          form.setValue('model3dRotationZ', calibration.rotationZ)
+                        }}
+                      />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </FormItem>
+          </div>
+
           <div className='flex flex-col gap-5 md:flex-row'>
             <FormField
               control={form.control}

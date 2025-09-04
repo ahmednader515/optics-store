@@ -9,6 +9,7 @@ import Lazy3DTryOn from '@/components/shared/lazy-3d-try-on'
 type TryOnDialogProps = {
   overlayImageUrl?: string
   model3dUrl?: string
+  productImages?: string[]
   model3dCalibration?: {
     scale: number
     offsetX: number
@@ -24,6 +25,7 @@ type TryOnDialogProps = {
 export default function TryOnDialog({ 
   overlayImageUrl, 
   model3dUrl, 
+  productImages,
   model3dCalibration,
   triggerClassName 
 }: TryOnDialogProps) {
@@ -48,10 +50,11 @@ export default function TryOnDialog({
         </DialogHeader>
         {/* Mount the camera UI only when dialog is open */}
         {open && (
-          <div className="p-3 sm:p-4">
+          <div className="p-0">
             {has3DModel ? (
               <Lazy3DTryOn
                 modelUrl={model3dUrl!}
+                productImages={productImages}
                 calibration={model3dCalibration!}
                 onClose={() => setOpen(false)}
               />

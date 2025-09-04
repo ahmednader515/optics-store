@@ -164,6 +164,7 @@ async function ProductHeader({ slug }: { slug: string }) {
                   <TryOnDialog 
                     overlayImageUrl={overlayUrl}
                     model3dUrl={model3dUrl}
+                    productImages={productData.images}
                     model3dCalibration={model3dCalibration}
                   />
                 )

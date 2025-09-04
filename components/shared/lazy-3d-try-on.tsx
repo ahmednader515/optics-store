@@ -24,6 +24,7 @@ const TryOn3D = dynamic(() => import('./3d-virtual-try-on'), {
 
 interface Lazy3DTryOnProps {
   modelUrl: string
+  productImages?: string[]
   calibration: {
     scale: number
     offsetX: number

@@ -7,8 +7,6 @@ import { Button } from '@/components/ui/button'
 import { RotateCcw } from 'lucide-react'
 
 // Lazy load Three.js components to avoid SSR issues
-const Canvas = lazy(() => import('@react-three/fiber').then(module => ({ default: module.Canvas })))
-const OrbitControls = lazy(() => import('@react-three/drei').then(module => ({ default: module.OrbitControls })))
 const Model3D = lazy(() => import('./3d-model-component').then(module => ({ default: module.Model3D })))
 const LoadingFallback = lazy(() => import('./3d-model-component').then(module => ({ default: module.LoadingFallback })))
 
@@ -154,23 +152,16 @@ export default function Model3DPreview({
                 </div>
               </div>
             }>
-              <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
-                <ambientLight intensity={0.5} />
-                <directionalLight position={[10, 10, 5]} intensity={1} />
-                <Suspense fallback={<LoadingFallback />}>
-                  <Model3D
-                    modelUrl={modelUrl}
-                    scale={localScale}
-                    offsetX={localOffsetX}
-                    offsetY={localOffsetY}
-                    offsetZ={localOffsetZ}
-                    rotationX={localRotationX}
-                    rotationY={localRotationY}
-                    rotationZ={localRotationZ}
-                  />
-                </Suspense>
-                <OrbitControls enablePan={false} />
-              </Canvas>
+              <Model3D
+                modelUrl={modelUrl}
+                scale={localScale}
+                offsetX={localOffsetX}
+                offsetY={localOffsetY}
+                offsetZ={localOffsetZ}
+                rotationX={localRotationX}
+                rotationY={localRotationY}
+                rotationZ={localRotationZ}
+              />
             </Suspense>
           </div>
         </ThreeJSErrorBoundary>

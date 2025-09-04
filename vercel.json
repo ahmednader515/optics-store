@@ -10,7 +10,7 @@
   "build": {
     "env": {
       "NODE_ENV": "production",
-      "PRISMA_CLIENT_ENGINE_TYPE": "binary"
+      "PRISMA_CLIENT_ENGINE_TYPE": "library"
     }
   }
 }

@@ -1,11 +1,26 @@
 'use client'
 
-import React, { Suspense, lazy } from 'react'
+import React from 'react'
+import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 
-// Lazy load the full 3D try-on component (react-three-fiber)
-const TryOn3D = lazy(() => import('./3d-virtual-try-on'))
+// Client-only dynamic import to avoid SSR/react-reconciler issues
+const TryOn3D = dynamic(() => import('./3d-virtual-try-on'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-orange-500" />
+        <h3 className="text-lg font-semibold mb-2">جاري تحميل النموذج ثلاثي الأبعاد</h3>
+        <p className="text-sm text-gray-600 mb-4">قد يستغرق هذا بضع ثوانٍ على الأجهزة البطيئة</p>
+        <div className="w-64 bg-gray-200 rounded-full h-2 mx-auto">
+          <div className="bg-orange-500 h-2 rounded-full animate-pulse" style={{ width: '60%' }} />
+        </div>
+      </div>
+    </div>
+  )
+})
 
 interface Lazy3DTryOnProps {
   modelUrl: string
@@ -19,24 +34,6 @@ interface Lazy3DTryOnProps {
     rotationZ: number
   }
   onClose: () => void
-}
-
-// Loading fallback component
-function LoadingFallback() {
-  return (
-    <div className="w-full h-full flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-orange-500" />
-        <h3 className="text-lg font-semibold mb-2">جاري تحميل النموذج ثلاثي الأبعاد</h3>
-        <p className="text-sm text-gray-600 mb-4">
-          قد يستغرق هذا بضع ثوانٍ على الأجهزة البطيئة
-        </p>
-        <div className="w-64 bg-gray-200 rounded-full h-2 mx-auto">
-          <div className="bg-orange-500 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
-        </div>
-      </div>
-    </div>
-  )
 }
 
 // Error boundary component
@@ -98,9 +95,7 @@ function ErrorFallback({ onClose }: { onClose: () => void }) {
 export default function Lazy3DTryOn(props: Lazy3DTryOnProps) {
   return (
     <ErrorBoundary fallback={<ErrorFallback onClose={props.onClose} />}>
-      <Suspense fallback={<LoadingFallback />}>
-        <TryOn3D {...props} />
-      </Suspense>
+      <TryOn3D {...props} />
     </ErrorBoundary>
   )
 }

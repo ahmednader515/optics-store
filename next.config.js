@@ -32,15 +32,14 @@ const nextConfig = {
     serverActions: {
       allowedOrigins: ['localhost:3000', 'localhost:3001'],
     },
-    // Ensure Prisma engine files are included in server output
-    instrumentationHook: true,
-    // Explicitly include Prisma engines in traced output
-    outputFileTracingIncludes: {
-      '*': [
-        './node_modules/.prisma/client/**',
-        './node_modules/@prisma/client/**'
-      ],
-    },
+  },
+  
+  // Explicitly include Prisma engines in traced output (moved from experimental)
+  outputFileTracingIncludes: {
+    '*': [
+      './node_modules/.prisma/client/**',
+      './node_modules/@prisma/client/**'
+    ],
   },
   
   // Reduce bundle size and improve loading
@@ -105,7 +104,7 @@ const nextConfig = {
   // Environment-specific settings
   env: {
     CUSTOM_KEY: process.env.NODE_ENV === 'production' ? 'production' : 'development',
-    PRISMA_CLIENT_ENGINE_TYPE: 'binary',
+    PRISMA_CLIENT_ENGINE_TYPE: process.env.NODE_ENV === 'production' ? 'library' : 'binary',
   },
   
   // Handle runtime errors gracefully

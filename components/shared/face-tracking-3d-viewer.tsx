@@ -1,9 +1,8 @@
-'use client'
+"use client"
 
-import React, { useRef, useEffect, useState, useCallback } from 'react'
-import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-// Using browser's built-in face detection instead of MediaPipe
+import React, { useRef, useEffect, useState, useCallback } from "react"
+import * as THREE from "three"
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
 
 interface FaceTrackingData {
   leftEye: { x: number; y: number }
@@ -23,6 +22,8 @@ interface FaceTracking3DViewerProps {
   rotationX?: number
   rotationY?: number
   rotationZ?: number
+  fitMultiplier?: number
+  eyeLift?: number
   onCalibrationChange?: (calibration: {
     scale: number
     offsetX: number
@@ -44,409 +45,344 @@ export default function FaceTracking3DViewer({
   rotationX = 0,
   rotationY = 0,
   rotationZ = 0,
+  fitMultiplier = 2.25,
+  eyeLift = -0.25,
   onCalibrationChange,
-  onFaceDataChange
+  onFaceDataChange,
 }: FaceTracking3DViewerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const faceDetectionRef = useRef<FaceDetector | null>(null)
+  const landmarkerRef = useRef<any>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const animationRef = useRef<number | null>(null)
-  
-  // Three.js refs
+
+  // Three.js
   const sceneRef = useRef<THREE.Scene | null>(null)
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
   const modelRef = useRef<THREE.Group | null>(null)
   const videoTextureRef = useRef<THREE.VideoTexture | null>(null)
   const backgroundPlaneRef = useRef<THREE.Mesh | null>(null)
+  const baseModelWidthRef = useRef<number>(1)
+  const baseModelHeightRef = useRef<number>(1)
+  const faceOccluderRef = useRef<THREE.Mesh | null>(null)
 
-  // Fit background plane to viewport while preserving video aspect ratio
+  // smoothing
+  const smoothPos = useRef({ x: 0, y: 0 })
+  const smoothRot = useRef({ x: 0, y: 0, z: 0 })
+  const smoothScale = useRef(scale)
+  const lastTs = useRef<number>(performance.now())
+
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isCameraActive, setIsCameraActive] = useState(false)
+  const [faceData, setFaceData] = useState<FaceTrackingData | null>(null)
+
+  /** Fit background plane to viewport */
   const updateBackgroundPlaneSize = useCallback(() => {
     if (!rendererRef.current || !cameraRef.current || !backgroundPlaneRef.current) return
     const renderer = rendererRef.current
     const camera = cameraRef.current
     const plane = backgroundPlaneRef.current
 
-    const viewportWidth = renderer.domElement.clientWidth
-    const viewportHeight = Math.max(renderer.domElement.clientHeight, 1)
-    const viewportAspect = viewportWidth / viewportHeight
+    const vw = renderer.domElement.clientWidth
+    const vh = renderer.domElement.clientHeight
+    const aspect = vw / vh
 
-    // Default to 4:3 if video metadata not ready yet
-    const videoW = videoRef.current?.videoWidth || 640
-    const videoH = videoRef.current?.videoHeight || 480
-    const videoAspect = videoW / Math.max(videoH, 1)
+    const vidW = videoRef.current?.videoWidth || 640
+    const vidH = videoRef.current?.videoHeight || 480
+    const vidAspect = vidW / vidH
 
-    const cameraZ = camera.position.z
-    const planeZ = plane.position.z
-    const distance = cameraZ - planeZ
+    const dist = camera.position.z - plane.position.z
     const vFov = (camera.fov * Math.PI) / 180
-    const viewportHeightWorld = 2 * Math.tan(vFov / 2) * distance
-    const viewportWidthWorld = viewportHeightWorld * viewportAspect
+    const viewH = 2 * Math.tan(vFov / 2) * dist
+    const viewW = viewH * aspect
 
-    // Cover viewport without stretching (preserve video aspect)
-    let planeHeightWorld = viewportHeightWorld
-    let planeWidthWorld = planeHeightWorld * videoAspect
-    if (planeWidthWorld < viewportWidthWorld) {
-      planeWidthWorld = viewportWidthWorld
-      planeHeightWorld = planeWidthWorld / videoAspect
+    let planeH = viewH
+    let planeW = planeH * vidAspect
+    if (planeW < viewW) {
+      planeW = viewW
+      planeH = planeW / vidAspect
     }
-
-    plane.scale.set(planeWidthWorld, planeHeightWorld, 1)
-    plane.position.x = 0
-    plane.position.y = 0
+    plane.scale.set(planeW, planeH, 1)
   }, [])
-  
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isCameraActive, setIsCameraActive] = useState(false)
-  const [faceData, setFaceData] = useState<FaceTrackingData | null>(null)
 
-  // Create video texture background
+  /** viewport world size */
+  const getViewportWorldSize = useCallback(() => {
+    if (!rendererRef.current || !cameraRef.current) return { width: 4, height: 3 }
+    const renderer = rendererRef.current
+    const camera = cameraRef.current
+    const vw = renderer.domElement.clientWidth
+    const vh = renderer.domElement.clientHeight
+    const aspect = vw / vh
+    const dist = camera.position.z
+    const vFov = (camera.fov * Math.PI) / 180
+    const viewH = 2 * Math.tan(vFov / 2) * dist
+    const viewW = viewH * aspect
+    return { width: viewW, height: viewH }
+  }, [])
+
+  /** create video texture background */
   const createVideoTexture = useCallback(() => {
-    if (!videoRef.current || !sceneRef.current || !cameraRef.current || !rendererRef.current) return
+    if (!videoRef.current || !sceneRef.current) return
+    const tex = new THREE.VideoTexture(videoRef.current)
+    tex.minFilter = THREE.LinearFilter
+    tex.magFilter = THREE.LinearFilter
+    tex.wrapS = THREE.RepeatWrapping
+    tex.repeat.x = -1
+    tex.offset.x = 1
+    videoTextureRef.current = tex
 
-    // Create video texture
-    const videoTexture = new THREE.VideoTexture(videoRef.current)
-    videoTexture.minFilter = THREE.LinearFilter
-    videoTexture.magFilter = THREE.LinearFilter
-    // Mirror like a selfie camera
-    videoTexture.wrapS = THREE.RepeatWrapping
-    videoTexture.repeat.x = -1
-    videoTexture.offset.x = 1
-    videoTextureRef.current = videoTexture
-
-    // Create background plane sized to fill viewport
-    const geometry = new THREE.PlaneGeometry(1, 1)
-    const material = new THREE.MeshBasicMaterial({ map: videoTexture, side: THREE.DoubleSide })
-    const backgroundPlane = new THREE.Mesh(geometry, material)
-    backgroundPlane.position.z = -1 // Slightly behind origin
-    backgroundPlaneRef.current = backgroundPlane
-    sceneRef.current.add(backgroundPlane)
-
-    // Fit plane size initially
+    const geo = new THREE.PlaneGeometry(1, 1)
+    const mat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })
+    const bg = new THREE.Mesh(geo, mat)
+    bg.position.z = -1
+    sceneRef.current.add(bg)
+    backgroundPlaneRef.current = bg
     updateBackgroundPlaneSize()
-  }, [])
+  }, [updateBackgroundPlaneSize])
 
-  // Load 3D model
+  /** occluder */
+  const ensureFaceOccluder = useCallback(() => {
+    if (!sceneRef.current || faceOccluderRef.current) return
+    const geo = new THREE.CircleGeometry(0.5, 32)
+    const mat = new THREE.MeshBasicMaterial({
+      colorWrite: false,
+      depthWrite: true,
+      depthTest: true,
+      transparent: true,
+    })
+    const mesh = new THREE.Mesh(geo, mat)
+    mesh.position.z = offsetZ + 0.01
+    mesh.renderOrder = 0
+    sceneRef.current.add(mesh)
+    faceOccluderRef.current = mesh
+  }, [offsetZ])
+
+  /** load 3D model */
   const load3DModel = useCallback(() => {
     if (!modelUrl || !sceneRef.current) {
       setIsLoading(false)
       return
     }
-
+    if (modelRef.current) sceneRef.current.remove(modelRef.current)
     const loader = new GLTFLoader()
     loader.load(
       modelUrl,
       (gltf) => {
         const model = gltf.scene
         model.scale.set(scale, scale, scale)
-        model.position.set(offsetX, offsetY, offsetZ)
-        model.rotation.set(
-          (rotationX * Math.PI) / 180,
-          (rotationY * Math.PI) / 180,
-          (rotationZ * Math.PI) / 180
-        )
-        
-        // Center the model
+        model.visible = false
         const box = new THREE.Box3().setFromObject(model)
         const center = box.getCenter(new THREE.Vector3())
         model.position.sub(center)
-        
+        const width = box.max.x - box.min.x || 1
+        baseModelWidthRef.current = width
+        const height = box.max.y - box.min.y || 1
+        baseModelHeightRef.current = height
         sceneRef.current?.add(model)
         modelRef.current = model
         setIsLoading(false)
       },
       undefined,
-      (error) => {
-        console.error('Error loading 3D model:', error)
-        setError('Failed to load 3D model')
+      (err) => {
+        console.error("Model load error:", err)
+        setError("Failed to load 3D model")
         setIsLoading(false)
       }
     )
-  }, [modelUrl, scale, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ])
+  }, [modelUrl, scale])
 
-  // Initialize face detection
+  /** init mediapipe */
   const initializeFaceDetection = useCallback(async () => {
     try {
-      // Check if FaceDetector is available
-      if (!('FaceDetector' in window)) {
-        console.warn('FaceDetector not supported, using fallback')
-        return
-      }
-
-      const faceDetector = new (window as any).FaceDetector({
-        maxDetectedFaces: 1,
-        fastMode: true
+      const vision = await import("@mediapipe/tasks-vision")
+      const filesetResolver = await vision.FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+      )
+      landmarkerRef.current = await vision.FaceLandmarker.createFromOptions(filesetResolver, {
+        baseOptions: {
+          modelAssetPath:
+            "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task",
+        },
+        runningMode: "VIDEO",
+        numFaces: 1,
       })
-
-      faceDetectionRef.current = faceDetector
-    } catch (err) {
-      console.error('Error initializing face detection:', err)
-      setError('Failed to initialize face tracking')
+    } catch (e) {
+      console.warn("Face tracking not available", e)
     }
   }, [])
 
-  // Start camera
-  const startCamera = useCallback(async () => {
-    if (!videoRef.current) return
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480 }
-      })
-      
-      videoRef.current.srcObject = stream
-      videoRef.current.play()
-      streamRef.current = stream
-      setIsCameraActive(true)
-
-      // Create video texture when video is ready
-      videoRef.current.addEventListener('loadeddata', () => {
-        createVideoTexture()
-      })
-
-      // Start face detection and rendering loop
-      const detectAndRender = async () => {
-        if (!videoRef.current || !rendererRef.current || !sceneRef.current || !cameraRef.current) return
-
-        // Detect faces if available
-        if (faceDetectionRef.current) {
-          try {
-            const faces = await faceDetectionRef.current.detect(videoRef.current)
-            
-            if (faces.length > 0) {
-              const face = faces[0]
-              const boundingBox = face.boundingBox
-              
-              // Calculate eye positions
-              const leftEyeX = boundingBox.x + boundingBox.width * 0.3
-              const rightEyeX = boundingBox.x + boundingBox.width * 0.7
-              const eyeY = boundingBox.y + boundingBox.height * 0.4
-              const noseX = boundingBox.x + boundingBox.width * 0.5
-              const noseY = boundingBox.y + boundingBox.height * 0.6
-              
-              // Normalize coordinates
-              const leftEye = { 
-                x: leftEyeX / videoRef.current.videoWidth, 
-                y: eyeY / videoRef.current.videoHeight 
-              }
-              const rightEye = { 
-                x: rightEyeX / videoRef.current.videoWidth, 
-                y: eyeY / videoRef.current.videoHeight 
-              }
-              const nose = { 
-                x: noseX / videoRef.current.videoWidth, 
-                y: noseY / videoRef.current.videoHeight 
-              }
-              
-              // Calculate face rotation
-              const eyeDistance = Math.sqrt(
-                Math.pow(rightEye.x - leftEye.x, 2) + 
-                Math.pow(rightEye.y - leftEye.y, 2)
-              )
-              
-              const faceScale = eyeDistance * 2
-              const yaw = Math.atan2(rightEye.x - leftEye.x, rightEye.y - leftEye.y) * (180 / Math.PI)
-              const pitch = Math.atan2(nose.y - eyeY, 0.1) * (180 / Math.PI)
-              const roll = Math.atan2(rightEye.y - leftEye.y, rightEye.x - leftEye.x) * (180 / Math.PI)
-              
-              const newFaceData: FaceTrackingData = {
-                leftEye,
-                rightEye,
-                nose,
-                rotation: { yaw, pitch, roll },
-                scale: faceScale,
-                landmarks: []
-              }
-              
-              setFaceData(newFaceData)
-              onFaceDataChange?.(newFaceData)
-
-              // Update 3D model position based on face tracking
-              if (modelRef.current) {
-                // Position glasses on the eyes
-                const eyeCenterX = (leftEye.x + rightEye.x) / 2
-                const eyeCenterY = (leftEye.y + rightEye.y) / 2
-                
-                // Convert screen coordinates to 3D world coordinates
-                const worldX = (eyeCenterX - 0.5) * 4 // Scale and center
-                const worldY = -(eyeCenterY - 0.5) * 3 // Scale, center, and flip Y
-                
-                // Apply face tracking position
-                modelRef.current.position.set(
-                  worldX + offsetX,
-                  worldY + offsetY,
-                  offsetZ
-                )
-                
-                // Apply face tracking rotation
-                modelRef.current.rotation.set(
-                  ((rotationX + newFaceData.rotation.pitch) * Math.PI) / 180,
-                  ((rotationY + newFaceData.rotation.yaw) * Math.PI) / 180,
-                  ((rotationZ + newFaceData.rotation.roll) * Math.PI) / 180
-                )
-                
-                // Apply face tracking scale
-                const faceScale = newFaceData.scale * scale
-                modelRef.current.scale.set(faceScale, faceScale, faceScale)
-              }
-            } else {
-              setFaceData(null)
-              onFaceDataChange?.(null)
-            }
-          } catch (err) {
-            console.error('Face detection error:', err)
-          }
-        }
-        
-        // Render the 3D scene
-        rendererRef.current.render(sceneRef.current, cameraRef.current)
-        
-        // Continue rendering loop
-        if (isCameraActive) {
-          animationRef.current = requestAnimationFrame(detectAndRender)
+  // Suppress noisy TFLite INFO logs that are emitted via console.error by MediaPipe
+  useEffect(() => {
+    const originalError = console.error
+    const filter = (...args: unknown[]) => {
+      const first = args[0]
+      if (typeof first === 'string') {
+        if (first.startsWith('INFO: Created TensorFlow Lite') || first.includes('XNNPACK delegate')) {
+          return
         }
       }
-      
-      // Start detection after video is ready
-      videoRef.current.addEventListener('loadeddata', () => {
-        updateBackgroundPlaneSize()
-        detectAndRender()
-      })
-      
-    } catch (err) {
-      console.error('Error starting camera:', err)
-      setError('Failed to start camera')
+      return (originalError as any).apply(console, args as any)
     }
-  }, [isCameraActive, onFaceDataChange, scale, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ])
+    console.error = filter as any
+    return () => {
+      console.error = originalError
+    }
+  }, [])
 
-  // Stop camera
+  /** start camera */
+  const startCamera = useCallback(async () => {
+    if (!videoRef.current) return
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
+    videoRef.current.srcObject = stream
+    await videoRef.current.play().catch(() => {})
+    streamRef.current = stream
+    setIsCameraActive(true)
+    videoRef.current.addEventListener("loadeddata", () => {
+      createVideoTexture()
+    })
+
+    const detectAndRender = async () => {
+      if (!videoRef.current || !landmarkerRef.current || !sceneRef.current || !rendererRef.current || !cameraRef.current) {
+        if (isCameraActive) animationRef.current = requestAnimationFrame(detectAndRender)
+        return
+      }
+      const video = videoRef.current
+      const now = performance.now()
+      const results = await landmarkerRef.current.detectForVideo(video, now)
+      const lm = results?.faceLandmarks?.[0]
+      if (lm) {
+        const L_OUT = 33,
+          L_IN = 133,
+          R_OUT = 362,
+          R_IN = 263,
+          NOSE = 1
+        const lOut = lm[L_OUT],
+          lIn = lm[L_IN],
+          rOut = lm[R_OUT],
+          rIn = lm[R_IN],
+          noseLm = lm[NOSE]
+        const left = { x: (lOut.x + lIn.x) / 2, y: (lOut.y + lIn.y) / 2, z: (lOut.z + lIn.z) / 2 }
+        const right = { x: (rOut.x + rIn.x) / 2, y: (rOut.y + rIn.y) / 2, z: (rOut.z + rIn.z) / 2 }
+        const mid = { x: (left.x + right.x) / 2, y: (left.y + right.y) / 2, z: (left.z + right.z) / 2 }
+        const roll = Math.atan2(right.y - left.y, right.x - left.x) * (180 / Math.PI)
+        const yaw = Math.atan2(right.z - left.z, right.x - left.x) * (180 / Math.PI)
+        const pitch = (noseLm.z - mid.z) * -180
+
+        const mirroredX = 1 - mid.x
+        const world = getViewportWorldSize()
+        const eyeDist = Math.hypot(right.x - left.x, right.y - left.y)
+        const desiredW = eyeDist * world.width * fitMultiplier
+        const faceScale = desiredW / baseModelWidthRef.current
+
+        const newFaceData: FaceTrackingData = {
+          leftEye: { x: left.x, y: left.y },
+          rightEye: { x: right.x, y: right.y },
+          nose: { x: noseLm.x, y: noseLm.y },
+          rotation: { yaw, pitch, roll },
+          scale: faceScale,
+        }
+        setFaceData(newFaceData)
+        onFaceDataChange?.(newFaceData)
+
+        if (modelRef.current) {
+          const worldX = (mirroredX - 0.5) * world.width
+          const worldY = -(mid.y - 0.5) * world.height
+          const dt = Math.max(0.001, (now - lastTs.current) / 1000)
+          lastTs.current = now
+          const alpha = 0.25
+          smoothPos.current.x += (worldX + offsetX - smoothPos.current.x) * alpha
+          smoothPos.current.y += (worldY + offsetY - smoothPos.current.y) * alpha
+          smoothRot.current.x += (((rotationX + pitch) * Math.PI) / 180 - smoothRot.current.x) * alpha
+          smoothRot.current.y += (((rotationY - yaw) * Math.PI) / 180 - smoothRot.current.y) * alpha
+          // Mirror only tilting (roll) direction
+          smoothRot.current.z += (((rotationZ + roll) * Math.PI) / 180 - smoothRot.current.z) * alpha
+          smoothScale.current += (faceScale * scale - smoothScale.current) * alpha
+
+          const eyeLiftWorld = -baseModelHeightRef.current * smoothScale.current * eyeLift
+          modelRef.current.position.set(smoothPos.current.x, smoothPos.current.y + eyeLiftWorld, offsetZ)
+          modelRef.current.rotation.set(smoothRot.current.x, smoothRot.current.y, smoothRot.current.z)
+          modelRef.current.scale.set(smoothScale.current, smoothScale.current, smoothScale.current)
+          modelRef.current.visible = true
+
+          if (faceOccluderRef.current) {
+            faceOccluderRef.current.position.set(smoothPos.current.x, smoothPos.current.y, offsetZ + 0.01)
+            faceOccluderRef.current.scale.set(desiredW * 0.8, desiredW * 0.9, 1)
+          }
+        }
+      } else {
+        setFaceData(null)
+        if (modelRef.current) modelRef.current.visible = false
+      }
+      rendererRef.current.render(sceneRef.current, cameraRef.current)
+      if (isCameraActive) animationRef.current = requestAnimationFrame(detectAndRender)
+    }
+
+    videoRef.current.addEventListener("loadeddata", () => {
+      updateBackgroundPlaneSize()
+      detectAndRender()
+    })
+  }, [createVideoTexture, updateBackgroundPlaneSize, getViewportWorldSize, isCameraActive, onFaceDataChange, scale, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, fitMultiplier, eyeLift])
+
   const stopCamera = useCallback(() => {
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current)
-      animationRef.current = null
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop())
-      streamRef.current = null
-    }
+    if (animationRef.current) cancelAnimationFrame(animationRef.current)
+    if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop())
     setIsCameraActive(false)
   }, [])
 
-  // Initialize 3D scene
+  /** init 3D scene */
   useEffect(() => {
     if (!canvasRef.current) return
-
-    // Scene setup
     const scene = new THREE.Scene()
     sceneRef.current = scene
-
-    // Camera setup
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      canvasRef.current.clientWidth / canvasRef.current.clientHeight,
-      0.1,
-      1000
-    )
-    camera.position.set(0, 0, 5)
+    const camera = new THREE.PerspectiveCamera(75, canvasRef.current.clientWidth / canvasRef.current.clientHeight, 0.1, 1000)
+    camera.position.z = 5
     cameraRef.current = camera
-
-    // Renderer setup
-    const renderer = new THREE.WebGLRenderer({ 
-      canvas: canvasRef.current,
-      antialias: true, 
-      alpha: true 
-    })
+    const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true, alpha: true })
     renderer.setSize(canvasRef.current.clientWidth, canvasRef.current.clientHeight)
-    renderer.shadowMap.enabled = true
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap
     rendererRef.current = renderer
-
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0x404040, 0.6)
-    scene.add(ambientLight)
-
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
-    directionalLight.position.set(10, 10, 5)
-    directionalLight.castShadow = true
-    scene.add(directionalLight)
-
-    // Load 3D model
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6))
+    const dir = new THREE.DirectionalLight(0xffffff, 0.8)
+    dir.position.set(10, 10, 5)
+    scene.add(dir)
     load3DModel()
-
-    // Initialize face detection
     initializeFaceDetection()
-
-    // Handle resize
-    const handleResize = () => {
+    ensureFaceOccluder()
+    const resize = () => {
       if (!canvasRef.current || !camera || !renderer) return
-      
-      const width = canvasRef.current.clientWidth
-      const height = canvasRef.current.clientHeight
-      
-      camera.aspect = width / height
+      const w = canvasRef.current.clientWidth
+      const h = canvasRef.current.clientHeight
+      camera.aspect = w / h
       camera.updateProjectionMatrix()
-      renderer.setSize(width, height)
-      // Fit background plane to new viewport preserving aspect
+      renderer.setSize(w, h)
       updateBackgroundPlaneSize()
     }
-
-    window.addEventListener('resize', handleResize)
-
-    // Cleanup
+    window.addEventListener("resize", resize)
     return () => {
-      window.removeEventListener('resize', handleResize)
+      window.removeEventListener("resize", resize)
       stopCamera()
-      if (renderer) {
-        renderer.dispose()
-      }
-      if (videoTextureRef.current) {
-        videoTextureRef.current.dispose()
-      }
+      renderer.dispose()
+      videoTextureRef.current?.dispose()
     }
-  }, [load3DModel, initializeFaceDetection, stopCamera, createVideoTexture, updateBackgroundPlaneSize])
+  }, [load3DModel, initializeFaceDetection, ensureFaceOccluder, updateBackgroundPlaneSize, stopCamera])
 
-  // Start camera automatically
   useEffect(() => {
     if (isLoading) return
-    
-    const timer = setTimeout(() => {
-      startCamera()
-    }, 1000) // Start camera 1 second after component loads
-
-    return () => clearTimeout(timer)
+    const t = setTimeout(() => startCamera(), 800)
+    return () => clearTimeout(t)
   }, [isLoading, startCamera])
 
-  // Notify parent of calibration changes
   useEffect(() => {
-    if (onCalibrationChange) {
-      onCalibrationChange({
-        scale,
-        offsetX,
-        offsetY,
-        offsetZ,
-        rotationX,
-        rotationY,
-        rotationZ
-      })
-    }
+    onCalibrationChange?.({ scale, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ })
   }, [scale, offsetX, offsetY, offsetZ, rotationX, rotationY, rotationZ, onCalibrationChange])
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      stopCamera()
-    }
-  }, [stopCamera])
+  useEffect(() => () => stopCamera(), [stopCamera])
 
   if (error) {
     return (
-      <div className="w-full h-64 border rounded-lg bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-2">Error loading virtual try-on</p>
-          <p className="text-sm text-gray-600">{error}</p>
-        </div>
+      <div className="w-full h-64 flex items-center justify-center bg-gray-50 border rounded-lg">
+        <p className="text-red-600">{error}</p>
       </div>
     )
   }
@@ -461,41 +397,12 @@ export default function FaceTracking3DViewer({
           </div>
         </div>
       )}
-      
-      {/* Video element for face tracking (hidden) */}
-      <video
-        ref={videoRef}
-        className="absolute top-0 left-0 w-full h-full object-cover opacity-0 pointer-events-none"
-        playsInline
-        muted
-      />
-      
-      {/* Canvas for 3D model rendering with video background */}
-      <canvas
-        ref={canvasRef}
-        className="w-full h-full"
-        style={{ display: 'block' }}
-      />
-      
-      {/* Camera status indicator */}
-      <div className="absolute top-2 right-2 z-20">
-        <div className={`px-2 py-1 rounded text-xs ${
-          isCameraActive 
-            ? 'bg-green-100 text-green-800' 
-            : 'bg-yellow-100 text-yellow-800'
-        }`}>
-          {isCameraActive ? 'Camera Active' : 'Starting Camera...'}
-        </div>
+      <video ref={videoRef} className="absolute top-0 left-0 w-full h-full object-cover opacity-0" playsInline muted />
+      <canvas ref={canvasRef} className="w-full h-full" />
+      <div className="absolute top-2 right-2 px-2 py-1 rounded text-xs bg-green-100 text-green-800">
+        {isCameraActive ? "Camera Active" : "Starting Camera..."}
       </div>
-      
-      {/* Face tracking status */}
       {faceData && (
-        <div className="absolute bottom-2 left-2 z-20">
-          <div className="px-2 py-1 rounded text-xs bg-blue-100 text-blue-800">
-            Face Detected
-          </div>
-        </div>
+        <div className="absolute bottom-2 left-2 px-2 py-1 rounded text-xs bg-blue-100 text-blue-800">Face Detected</div>
       )}
-    </div>
-  )
-}
+    </div>)}

@@ -46,7 +46,7 @@ export default function FaceTracking3DViewer({
   rotationY = 0,
   rotationZ = 0,
   fitMultiplier = 2,
-  eyeLift = 0.35,
+  eyeLift = 0,
   onCalibrationChange,
   onFaceDataChange,
 }: FaceTracking3DViewerProps) {
@@ -274,7 +274,13 @@ export default function FaceTracking3DViewer({
         const mid = { x: (left.x + right.x) / 2, y: (left.y + right.y) / 2, z: (left.z + right.z) / 2 }
         const roll = Math.atan2(right.y - left.y, right.x - left.x) * (180 / Math.PI)
         const yaw = Math.atan2(right.z - left.z, right.x - left.x) * (180 / Math.PI)
-        const pitch = (noseLm.z - mid.z) * -180
+        // Robust pitch estimate independent of absolute Y: use 2D vertical offset of nose from eye midpoint,
+        // normalized by inter-eye distance, with sign so up = positive
+        const eyeDist2D = Math.max(1e-6, Math.hypot(right.x - left.x, right.y - left.y))
+        const pitch2d = (mid.y - noseLm.y) / eyeDist2D // nose above mid -> positive
+        const pitch = Math.max(-25, Math.min(25, pitch2d * 120))
+        // Deadzone to prevent tilt changes from mere vertical translation in frame
+        const pitchAdjusted = Math.abs(pitch) < 8 ? 0 : pitch
 
         const mirroredX = 1 - mid.x
         const plane = getVideoPlaneWorldSize()
@@ -300,7 +306,8 @@ export default function FaceTracking3DViewer({
           const alpha = 0.25
           smoothPos.current.x += (worldX + offsetX - smoothPos.current.x) * alpha
           smoothPos.current.y += (worldY + offsetY - smoothPos.current.y) * alpha
-          smoothRot.current.x += (((rotationX + pitch) * Math.PI) / 180 - smoothRot.current.x) * alpha
+          // Ignore pitch entirely to prevent up/down tilting
+          smoothRot.current.x += (((rotationX) * Math.PI) / 180 - smoothRot.current.x) * alpha
           smoothRot.current.y += (((rotationY - yaw) * Math.PI) / 180 - smoothRot.current.y) * alpha
           // Mirror only tilting (roll) direction
           smoothRot.current.z += (((rotationZ + roll) * Math.PI) / 180 - smoothRot.current.z) * alpha

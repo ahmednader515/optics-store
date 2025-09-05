@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import FaceTracking3DViewer from './face-tracking-3d-viewer'
 import { Button } from '@/components/ui/button'
 import { Camera, CameraOff, RotateCcw } from 'lucide-react'
@@ -45,6 +45,16 @@ export default function TryOn3D({
   calibration 
 }: Model3DProps) {
   const [currentFaceData, setCurrentFaceData] = useState<FaceTrackingData | null>(null)
+  const [isSmallScreen, setIsSmallScreen] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('matchMedia' in window)) return
+    const mql = window.matchMedia('(max-width: 640px)')
+    const update = () => setIsSmallScreen(mql.matches)
+    update()
+    mql.addEventListener?.('change', update)
+    return () => mql.removeEventListener?.('change', update)
+  }, [])
 
   const handleFaceDataChange = (newFaceData: FaceTrackingData | null) => {
     setCurrentFaceData(newFaceData)
@@ -54,20 +64,22 @@ export default function TryOn3D({
     <div className="w-full h-full flex flex-col">
       {/* Camera preview takes full available space */}
       <div className="flex-1 min-h-0 w-full">
-        <FaceTracking3DViewer
-          modelUrl={modelUrl}
-          scale={calibration.scale}
-          offsetX={calibration.offsetX}
-          offsetY={calibration.offsetY}
-          offsetZ={calibration.offsetZ}
-          rotationX={calibration.rotationX}
-          rotationY={calibration.rotationY}
-          rotationZ={calibration.rotationZ}
-          onCalibrationChange={(cal) => {
-            // Handle calibration changes if needed
-          }}
-          onFaceDataChange={handleFaceDataChange}
-        />
+        <div className="w-full" style={{ aspectRatio: isSmallScreen ? '9 / 16' : '16 / 9' }}>
+          <FaceTracking3DViewer
+            modelUrl={modelUrl}
+            scale={calibration.scale}
+            offsetX={calibration.offsetX}
+            offsetY={calibration.offsetY}
+            offsetZ={calibration.offsetZ}
+            rotationX={calibration.rotationX}
+            rotationY={calibration.rotationY}
+            rotationZ={calibration.rotationZ}
+            onCalibrationChange={(cal) => {
+              // Handle calibration changes if needed
+            }}
+            onFaceDataChange={handleFaceDataChange}
+          />
+        </div>
       </div>
 
       {/* Controls removed as requested */}

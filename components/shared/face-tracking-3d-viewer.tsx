@@ -72,6 +72,17 @@ export default function FaceTracking3DViewer({
   const smoothRot = useRef({ x: 0, y: 0, z: 0 })
   const smoothScale = useRef(scale)
   const lastTs = useRef<number>(performance.now())
+  const lastDetectTs = useRef<number>(0)
+  const detectionIntervalMs = useRef<number>(33)
+  // Stabilize presence (avoid rapid appear/disappear flicker)
+  const presenceRef = useRef<{ present: boolean; hits: number; misses: number; lastUpdate: number }>({
+    present: false,
+    hits: 0,
+    misses: 0,
+    lastUpdate: 0,
+  })
+  const HITS_TO_SHOW = 2 // require 2 consecutive hits to show
+  const MISSES_TO_HIDE = 10 // require 10 consecutive misses to hide (~300ms at 33ms interval)
 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -240,14 +251,21 @@ export default function FaceTracking3DViewer({
   /** start camera */
   const startCamera = useCallback(async () => {
     if (!videoRef.current) return
-    const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        width: { ideal: 640 },
+        height: { ideal: 480 },
+        frameRate: { ideal: 30, max: 30 },
+      },
+      audio: false,
+    })
     videoRef.current.srcObject = stream
     await videoRef.current.play().catch(() => {})
     streamRef.current = stream
     setIsCameraActive(true)
     videoRef.current.addEventListener("loadeddata", () => {
       createVideoTexture()
-    })
+    }, { once: true })
 
     const detectAndRender = async () => {
       if (!videoRef.current || !landmarkerRef.current || !sceneRef.current || !rendererRef.current || !cameraRef.current) {
@@ -256,9 +274,25 @@ export default function FaceTracking3DViewer({
       }
       const video = videoRef.current
       const now = performance.now()
-      const results = await landmarkerRef.current.detectForVideo(video, now)
-      const lm = results?.faceLandmarks?.[0]
+      // Throttle heavy detection for performance
+      let lm: any = null
+      if (now - lastDetectTs.current >= detectionIntervalMs.current) {
+        lastDetectTs.current = now
+        try {
+          const res = await landmarkerRef.current.detectForVideo(video, now)
+          lm = res?.faceLandmarks?.[0] || null
+        } catch {
+          lm = null
+        }
+      }
       if (lm) {
+        // Update stable presence state
+        presenceRef.current.hits += 1
+        presenceRef.current.misses = 0
+        presenceRef.current.lastUpdate = now
+        if (!presenceRef.current.present && presenceRef.current.hits >= HITS_TO_SHOW) {
+          presenceRef.current.present = true
+        }
         const L_OUT = 33,
           L_IN = 133,
           R_OUT = 362,
@@ -298,7 +332,7 @@ export default function FaceTracking3DViewer({
         setFaceData(newFaceData)
         onFaceDataChange?.(newFaceData)
 
-        if (modelRef.current) {
+        if (modelRef.current && presenceRef.current.present) {
           const worldX = (mirroredX - 0.5) * plane.width
           const worldY = -(mid.y - 0.5) * plane.height
           const dt = Math.max(0.001, (now - lastTs.current) / 1000)
@@ -325,8 +359,16 @@ export default function FaceTracking3DViewer({
           }
         }
       } else {
-        setFaceData(null)
-        if (modelRef.current) modelRef.current.visible = false
+        // No landmarks this frame; only hide after sustained misses.
+        presenceRef.current.misses += 1
+        presenceRef.current.hits = 0
+        if (presenceRef.current.present && presenceRef.current.misses < MISSES_TO_HIDE) {
+          // Keep rendering last smoothed pose; do not update state
+        } else {
+          presenceRef.current.present = false
+          setFaceData(null)
+          if (modelRef.current) modelRef.current.visible = false
+        }
       }
       rendererRef.current.render(sceneRef.current, cameraRef.current)
       if (isCameraActive) animationRef.current = requestAnimationFrame(detectAndRender)
@@ -353,6 +395,7 @@ export default function FaceTracking3DViewer({
     camera.position.z = 5
     cameraRef.current = camera
     const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true, alpha: true })
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5))
     renderer.setSize(canvasRef.current.clientWidth, canvasRef.current.clientHeight)
     rendererRef.current = renderer
     scene.add(new THREE.AmbientLight(0xffffff, 0.6))
@@ -371,11 +414,16 @@ export default function FaceTracking3DViewer({
       renderer.setSize(w, h)
       updateBackgroundPlaneSize()
     }
-    window.addEventListener("resize", resize)
+    window.addEventListener("resize", resize, { passive: true })
     return () => {
       window.removeEventListener("resize", resize)
       stopCamera()
       renderer.dispose()
+      // Clean up stream on unmount to free camera/GPU
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop())
+        streamRef.current = null
+      }
       videoTextureRef.current?.dispose()
     }
   }, [load3DModel, initializeFaceDetection, ensureFaceOccluder, updateBackgroundPlaneSize, stopCamera])

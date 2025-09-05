@@ -45,8 +45,8 @@ export default function FaceTracking3DViewer({
   rotationX = 0,
   rotationY = 0,
   rotationZ = 0,
-  fitMultiplier = 2.25,
-  eyeLift = -0.25,
+  fitMultiplier = 2,
+  eyeLift = 0.35,
   onCalibrationChange,
   onFaceDataChange,
 }: FaceTracking3DViewerProps) {
@@ -121,6 +121,12 @@ export default function FaceTracking3DViewer({
     const viewW = viewH * aspect
     return { width: viewW, height: viewH }
   }, [])
+
+  /** video plane world size (preferred for mapping face coords) */
+  const getVideoPlaneWorldSize = useCallback(() => {
+    if (!backgroundPlaneRef.current) return getViewportWorldSize()
+    return { width: backgroundPlaneRef.current.scale.x, height: backgroundPlaneRef.current.scale.y }
+  }, [getViewportWorldSize])
 
   /** create video texture background */
   const createVideoTexture = useCallback(() => {
@@ -271,9 +277,9 @@ export default function FaceTracking3DViewer({
         const pitch = (noseLm.z - mid.z) * -180
 
         const mirroredX = 1 - mid.x
-        const world = getViewportWorldSize()
+        const plane = getVideoPlaneWorldSize()
         const eyeDist = Math.hypot(right.x - left.x, right.y - left.y)
-        const desiredW = eyeDist * world.width * fitMultiplier
+        const desiredW = eyeDist * plane.width * fitMultiplier
         const faceScale = desiredW / baseModelWidthRef.current
 
         const newFaceData: FaceTrackingData = {
@@ -287,8 +293,8 @@ export default function FaceTracking3DViewer({
         onFaceDataChange?.(newFaceData)
 
         if (modelRef.current) {
-          const worldX = (mirroredX - 0.5) * world.width
-          const worldY = -(mid.y - 0.5) * world.height
+          const worldX = (mirroredX - 0.5) * plane.width
+          const worldY = -(mid.y - 0.5) * plane.height
           const dt = Math.max(0.001, (now - lastTs.current) / 1000)
           lastTs.current = now
           const alpha = 0.25

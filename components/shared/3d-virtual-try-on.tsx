@@ -64,7 +64,7 @@ export default function TryOn3D({
     <div className="w-full h-full flex flex-col">
       {/* Camera preview takes full available space */}
       <div className="flex-1 min-h-0 w-full">
-        <div className="w-full" style={{ aspectRatio: isSmallScreen ? '9 / 16' : '16 / 9' }}>
+        <div className="w-full h-full sm:h-auto sm:aspect-video aspect-[9/16]">
           <FaceTracking3DViewer
             modelUrl={modelUrl}
             scale={calibration.scale}
